@@ -57,7 +57,7 @@
                 refTitle: "Notities & Intenties",
                 refPlaceholder: "Schrijf hier je intentie (Niyyah), gedachten of gebeden...",
                 entriesTitle: "Opgeslagen Notities",
-                msgSuccess: "Tijden berekend via Islamitische methode (15°).",
+                msgSuccess: "Tijden berekend op basis van astronomische schemering.",
                 msgErrorCalc: "Kon de tijden niet berekenen.",
                 msgNetError: "Netwerkfout bij het ophalen.",
                 msgGPSLocating: "GPS zoeken...",
@@ -83,7 +83,7 @@
                 refTitle: "Notes & Intentions",
                 refPlaceholder: "Write your intention (Niyyah), thoughts or prayers here...",
                 entriesTitle: "Saved Notes",
-                msgSuccess: "Times calculated via Islamic method (15°).",
+                msgSuccess: "Times calculated based on astronomical twilight.",
                 msgErrorCalc: "Could not calculate times.",
                 msgNetError: "Network error during fetch.",
                 msgGPSLocating: "Locating GPS...",
@@ -195,7 +195,6 @@
                             target = solarDates.iftar;
                             eventName = 'Iftar';
                         } else {
-                            // Als we na Iftar zitten, tellen we af naar de Fajr van de volgende dag
                             target = new Date(solarDates.fajr.getTime() + 24 * 60 * 60 * 1000);
                             eventName = 'Fajr';
                         }
@@ -252,35 +251,30 @@
                 setIsLoadingLocation(true);
                 setLocationMessage('');
                 try {
-                    // Gespecialiseerde Aladhan API - Method 2 (ISNA, 15 graden hoek)
-                    const response = await fetch(`https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`);
-                    const json = await response.json();
+                    // TERUG NAAR DE ORIGINELE API (Sunrise-Sunset.org)
+                    const response = await fetch(`https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`);
+                    const data = await response.json();
                     
-                    if (json.code === 200) {
-                        const times = json.data.timings;
+                    if (data.status === 'OK') {
+                        const dawn = new Date(data.results.astronomical_twilight_begin);
+                        const dhuhr = new Date(data.results.solar_noon);
+                        const sunset = new Date(data.results.sunset);
+                        const isha = new Date(data.results.astronomical_twilight_end);
                         
-                        // Zet de "HH:MM" string om naar een Date object
-                        const createDate = (timeStr) => {
-                            const [hours, minutes] = timeStr.split(':').map(Number);
-                            const d = new Date();
-                            d.setHours(hours, minutes, 0, 0);
-                            return d;
-                        };
+                        const asrTimeMs = dhuhr.getTime() + (sunset.getTime() - dhuhr.getTime()) * 0.55;
+                        const asr = new Date(asrTimeMs);
 
-                        const fajr = createDate(times.Fajr);
-                        const dhuhr = createDate(times.Dhuhr);
-                        const asr = createDate(times.Asr);
-                        const maghrib = createDate(times.Maghrib);
-                        const isha = createDate(times.Isha);
-
-                        setSolarDates({ fajr, dhuhr, asr, maghrib, isha, iftar: maghrib });
+                        setSolarDates({ fajr: dawn, dhuhr, asr, maghrib: sunset, isha, iftar: sunset });
                         
+                        const deviceLocale = navigator.language || 'en-US';
+                        const timeOpts = { hour: '2-digit', minute: '2-digit' };
+
                         setSolarTimes({
-                            fajrLT: times.Fajr,
-                            dhuhrLT: times.Dhuhr,
-                            asrLT: times.Asr,
-                            maghribLT: times.Maghrib,
-                            ishaLT: times.Isha
+                            fajrLT: dawn.toLocaleTimeString(deviceLocale, timeOpts),
+                            dhuhrLT: dhuhr.toLocaleTimeString(deviceLocale, timeOpts),
+                            asrLT: asr.toLocaleTimeString(deviceLocale, timeOpts),
+                            maghribLT: sunset.toLocaleTimeString(deviceLocale, timeOpts),
+                            ishaLT: isha.toLocaleTimeString(deviceLocale, timeOpts)
                         });
                         setLocationMessage(t.msgSuccess);
                     } else {
