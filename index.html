@@ -8,15 +8,11 @@
     <meta name="theme-color" content="#064e3b">
     <title>Nautische Reflectie Gids</title>
 
-    <!-- PWA Manifest & Icons -->
     <link rel="manifest" href="manifest.json">
-    <!-- Zorg dat je een icon-192.png afbeelding (192x192 pixels) in je GitHub map hebt staan voor Apple apparaten -->
     <link rel="apple-touch-icon" href="icon-192.png">
 
-    <!-- Tailwind CSS voor de opmaak -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & Babel voor de logica -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -27,7 +23,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- Handmatige SVG Iconen (Omdat we geen losse bestanden hebben) ---
+        // --- Handmatige SVG Iconen ---
         const Icon = ({ children, size = 24, className = "", ...rest }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...rest}>
                 {children}
@@ -55,11 +51,6 @@
                 navDesc: "Gebruik GPS of voer handmatig de verwachte positie in voor de volgende vastendag.",
                 btnGPS: "Huidige GPS",
                 btnCalc: "Bereken Tijden",
-                fajr: "Fajr (Dageraad)",
-                dhuhr: "Dhuhr (Middag)",
-                asr: "Asr (Namiddag)",
-                maghrib: "Maghrib (Iftar)",
-                isha: "Isha (Nacht)",
                 timeTillFajr: "Tijd tot Fajr",
                 timeTillIftar: "Tijd tot Iftar",
                 fastTitleFallback: "Vasten Ritme",
@@ -76,7 +67,6 @@
                 msgGPSFail: "GPS faalde. Voer handmatig in.",
                 msgGPSNoSupport: "GPS niet ondersteund.",
                 msgManualFillAll: "Vul alle graden en minuten in.",
-                btnClear: "Wis",
                 copyright: "© 2026 Gemaakt voor Zeevarenden",
                 btnPrompt: "Suggestie"
             },
@@ -87,11 +77,6 @@
                 navDesc: "Use GPS or manually enter expected position for the next fasting day.",
                 btnGPS: "Current GPS",
                 btnCalc: "Calculate Times",
-                fajr: "Fajr (Dawn)",
-                dhuhr: "Dhuhr (Noon)",
-                asr: "Asr (Afternoon)",
-                maghrib: "Maghrib (Iftar)",
-                isha: "Isha (Night)",
                 timeTillFajr: "Time till Fajr",
                 timeTillIftar: "Time till Iftar",
                 fastTitleFallback: "Fasting Rhythm",
@@ -108,7 +93,6 @@
                 msgGPSFail: "GPS failed. Enter manually.",
                 msgGPSNoSupport: "GPS not supported.",
                 msgManualFillAll: "Fill all degrees and minutes.",
-                btnClear: "Clear",
                 copyright: "© 2026 Made for Seafarers",
                 btnPrompt: "Suggestion"
             }
@@ -161,8 +145,10 @@
             }, [entries]);
 
             const [solarDates, setSolarDates] = useState(null);
+            const [solarTimes, setSolarTimes] = useState(null);
             const [countdown, setCountdown] = useState('--:--:--');
             const [nextEvent, setNextEvent] = useState('');
+            const [nowTime, setNowTime] = useState(new Date());
 
             const [latDeg, setLatDeg] = useState(() => localStorage.getItem('latDeg') || '');
             const [latMin, setLatMin] = useState(() => localStorage.getItem('latMin') || '');
@@ -172,7 +158,6 @@
             const [lngMin, setLngMin] = useState(() => localStorage.getItem('lngMin') || '');
             const [lngDir, setLngDir] = useState(() => localStorage.getItem('lngDir') || 'E');
 
-            const [solarTimes, setSolarTimes] = useState(null);
             const [isLoadingLocation, setIsLoadingLocation] = useState(false);
             const [locationMessage, setLocationMessage] = useState('');
 
@@ -193,9 +178,11 @@
 
             useEffect(() => {
                 let interval;
-                if (solarDates) {
-                    const updateTimer = () => {
-                        const now = new Date();
+                const updateTimer = () => {
+                    const now = new Date();
+                    setNowTime(now); // Update klok continu
+
+                    if (solarDates) {
                         let target;
                         let eventName;
 
@@ -224,14 +211,14 @@
                             `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
                         );
                         setNextEvent(eventName);
-                    };
+                    } else {
+                        setCountdown('--:--:--');
+                        setNextEvent('');
+                    }
+                };
 
-                    updateTimer(); 
-                    interval = setInterval(updateTimer, 1000);
-                } else {
-                    setCountdown('--:--:--');
-                    setNextEvent('');
-                }
+                updateTimer(); 
+                interval = setInterval(updateTimer, 1000);
                 return () => clearInterval(interval);
             }, [solarDates]);
 
@@ -274,22 +261,18 @@
                         const asrTimeMs = dhuhr.getTime() + (sunset.getTime() - dhuhr.getTime()) * 0.55;
                         const asr = new Date(asrTimeMs);
 
-                        setSolarDates({ fajr: dawn, iftar: sunset });
+                        // Opslaan van alle tijden voor de cirkel
+                        setSolarDates({ fajr: dawn, dhuhr, asr, maghrib: sunset, isha, iftar: sunset });
                         
                         const deviceLocale = navigator.language || 'en-US';
                         const timeOpts = { hour: '2-digit', minute: '2-digit' };
 
                         setSolarTimes({
                             fajrLT: dawn.toLocaleTimeString(deviceLocale, timeOpts),
-                            fajrUTC: dawn.toISOString().substring(11, 16),
                             dhuhrLT: dhuhr.toLocaleTimeString(deviceLocale, timeOpts),
-                            dhuhrUTC: dhuhr.toISOString().substring(11, 16),
                             asrLT: asr.toLocaleTimeString(deviceLocale, timeOpts),
-                            asrUTC: asr.toISOString().substring(11, 16),
                             maghribLT: sunset.toLocaleTimeString(deviceLocale, timeOpts),
-                            maghribUTC: sunset.toISOString().substring(11, 16),
-                            ishaLT: isha.toLocaleTimeString(deviceLocale, timeOpts),
-                            ishaUTC: isha.toISOString().substring(11, 16)
+                            ishaLT: isha.toLocaleTimeString(deviceLocale, timeOpts)
                         });
                         setLocationMessage(t.msgSuccess);
                     } else {
@@ -348,6 +331,86 @@
                 }
             };
 
+            // Teken de 24-uurs grafiek
+            const renderDial = () => {
+                if (!solarDates) return null;
+
+                // Zet een tijdstip om in X,Y coördinaten (12:00 = Boven, 00:00 = Onder)
+                const getCoords = (date, radiusOffset = 0) => {
+                    if (!date) return { x: 140, y: 140 };
+                    const hours = date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+                    // Formule: Tijd naar radiaal (00:00 onder = + Pi)
+                    const radians = (hours / 24) * 2 * Math.PI + Math.PI;
+                    const r = 90 + radiusOffset; // Basis radius is 90px
+                    return {
+                        x: 140 + r * Math.sin(radians),
+                        y: 140 - r * Math.cos(radians)
+                    };
+                };
+
+                const nowCoords = getCoords(nowTime);
+
+                const markers = [
+                    { id: 'Fajr', name: 'Fajr', date: solarDates.fajr, time: solarTimes.fajrLT, color: '#059669' },
+                    { id: 'Dhuhr', name: 'Dhuhr', date: solarDates.dhuhr, time: solarTimes.dhuhrLT, color: '#10b981' },
+                    { id: 'Asr', name: 'Asr', date: solarDates.asr, time: solarTimes.asrLT, color: '#34d399' },
+                    { id: 'Maghrib', name: 'Maghrib', date: solarDates.maghrib, time: solarTimes.maghribLT, color: '#047857' },
+                    { id: 'Isha', name: 'Isha', date: solarDates.isha, time: solarTimes.ishaLT, color: '#064e3b' }
+                ];
+
+                return (
+                    <div className="w-full flex justify-center py-4 relative">
+                        <svg viewBox="0 0 280 280" className="w-full max-w-[320px] h-auto font-sans drop-shadow-sm">
+                            {/* Achtergrond ring (Etmaal) */}
+                            <circle cx="140" cy="140" r="90" fill="none" stroke="#e7e5e4" strokeWidth="4" />
+                            
+                            {/* Assen-streepjes voor oriëntatie (0, 6, 12, 18 uur) */}
+                            <line x1="140" y1="45" x2="140" y2="55" stroke="#d6d3d1" strokeWidth="2" /> {/* 12:00 */}
+                            <line x1="140" y1="235" x2="140" y2="225" stroke="#d6d3d1" strokeWidth="2" /> {/* 00:00 */}
+                            <line x1="45" y1="140" x2="55" y2="140" stroke="#d6d3d1" strokeWidth="2" /> {/* 06:00 */}
+                            <line x1="235" y1="140" x2="225" y2="140" stroke="#d6d3d1" strokeWidth="2" /> {/* 18:00 */}
+
+                            {/* Center Tekst: Countdown */}
+                            <text x="140" y="130" textAnchor="middle" className="text-3xl font-mono fill-stone-800 tracking-widest font-light">
+                                {countdown}
+                            </text>
+                            <text x="140" y="150" textAnchor="middle" className="text-[10px] uppercase tracking-widest font-bold fill-emerald-700">
+                                {nextEvent === 'Fajr' ? t.timeTillFajr : (nextEvent === 'Iftar' ? t.timeTillIftar : t.fastTitleFallback)}
+                            </text>
+                            <text x="140" y="165" textAnchor="middle" className="text-[9px] fill-stone-400">
+                                {nextEvent === 'Fajr' ? t.waitingFajr : t.waitingIftar}
+                            </text>
+
+                            {/* Gebedspunten & Labels */}
+                            {markers.map((prayer) => {
+                                const pt = getCoords(prayer.date);
+                                const lbl = getCoords(prayer.date, 30); // Labels iets verder naar buiten
+                                
+                                return (
+                                    <g key={prayer.id}>
+                                        {/* Gekleurde punt op de ring */}
+                                        <circle cx={pt.x} cy={pt.y} r="5" fill={prayer.color} stroke="#fff" strokeWidth="1.5" />
+                                        {/* Label Tekst */}
+                                        <text x={lbl.x} y={lbl.y - 4} textAnchor="middle" dominantBaseline="middle" className="text-[10px] font-bold fill-stone-600">
+                                            {prayer.name}
+                                        </text>
+                                        <text x={lbl.x} y={lbl.y + 8} textAnchor="middle" dominantBaseline="middle" className="text-[9px] font-mono fill-stone-400">
+                                            {prayer.time}
+                                        </text>
+                                    </g>
+                                );
+                            })}
+
+                            {/* 'Huidige Tijd' (NU) Marker - Rood */}
+                            <g>
+                                <line x1="140" y1="140" x2={getCoords(nowTime, -8).x} y2={getCoords(nowTime, -8).y} stroke="#ef4444" strokeWidth="1" strokeDasharray="3,3" opacity="0.4" />
+                                <circle cx={nowCoords.x} cy={nowCoords.y} r="4" fill="#ef4444" stroke="#fff" strokeWidth="1.5" />
+                            </g>
+                        </svg>
+                    </div>
+                );
+            };
+
             return (
                 <div className="min-h-screen bg-stone-100 text-stone-800 font-sans pb-10">
                     <header className="bg-gradient-to-r from-emerald-800 to-teal-900 text-white p-6 shadow-md rounded-b-3xl relative">
@@ -367,6 +430,7 @@
                     </header>
 
                     <main className="max-w-md mx-auto px-4 mt-6 space-y-6">
+                        {/* Positie & Berekening */}
                         <section className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
                             <h2 className="text-lg font-medium text-stone-700 flex items-center gap-2 mb-3">
                                 <Navigation size={20} className="text-emerald-700" />
@@ -411,82 +475,27 @@
                             </div>
 
                             {locationMessage && <p className="text-xs text-center mt-4 text-emerald-800 bg-emerald-50 p-2 rounded-lg">{locationMessage}</p>}
+                        </section>
 
-                            {solarTimes && (
-                                <div className="mt-6 p-4 bg-stone-50 rounded-xl border border-stone-200 shadow-inner">
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                        <div className="text-center bg-white p-3 rounded-lg border border-stone-100 shadow-sm">
-                                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">{t.fajr}</p>
-                                            <div className="flex items-center justify-center gap-1.5 text-stone-800 mb-1">
-                                                <Sun size={14} className="text-emerald-600" />
-                                                <span className="text-lg font-medium leading-none">{solarTimes.fajrLT}</span>
-                                                <span className="text-[9px] text-stone-500 font-bold bg-stone-200 px-1 rounded">LT</span>
-                                            </div>
-                                            <span className="text-[10px] font-mono text-stone-400">{solarTimes.fajrUTC} UTC</span>
-                                        </div>
-                                        
-                                        <div className="text-center bg-white p-3 rounded-lg border border-stone-100 shadow-sm">
-                                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">{t.dhuhr}</p>
-                                            <div className="flex items-center justify-center gap-1.5 text-stone-800 mb-1">
-                                                <Sun size={14} className="text-emerald-500" />
-                                                <span className="text-lg font-medium leading-none">{solarTimes.dhuhrLT}</span>
-                                                <span className="text-[9px] text-stone-500 font-bold bg-stone-200 px-1 rounded">LT</span>
-                                            </div>
-                                            <span className="text-[10px] font-mono text-stone-400">{solarTimes.dhuhrUTC} UTC</span>
-                                        </div>
-
-                                        <div className="text-center bg-white p-3 rounded-lg border border-stone-100 shadow-sm">
-                                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">{t.asr}</p>
-                                            <div className="flex items-center justify-center gap-1.5 text-stone-800 mb-1">
-                                                <Sun size={14} className="text-emerald-600 opacity-80" />
-                                                <span className="text-lg font-medium leading-none">{solarTimes.asrLT}</span>
-                                                <span className="text-[9px] text-stone-500 font-bold bg-stone-200 px-1 rounded">LT</span>
-                                            </div>
-                                            <span className="text-[10px] font-mono text-stone-400">{solarTimes.asrUTC} UTC</span>
-                                        </div>
-
-                                        <div className="text-center bg-white p-3 rounded-lg border border-stone-100 shadow-sm">
-                                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">{t.maghrib}</p>
-                                            <div className="flex items-center justify-center gap-1.5 text-stone-800 mb-1">
-                                                <Moon size={14} className="text-emerald-700" />
-                                                <span className="text-lg font-medium leading-none">{solarTimes.maghribLT}</span>
-                                                <span className="text-[9px] text-stone-500 font-bold bg-stone-200 px-1 rounded">LT</span>
-                                            </div>
-                                            <span className="text-[10px] font-mono text-stone-400">{solarTimes.maghribUTC} UTC</span>
-                                        </div>
-
-                                        <div className="text-center bg-white p-3 rounded-lg border border-stone-100 shadow-sm md:col-span-2">
-                                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">{t.isha}</p>
-                                            <div className="flex items-center justify-center gap-1.5 text-stone-800 mb-1">
-                                                <Moon size={14} className="text-emerald-900" />
-                                                <span className="text-lg font-medium leading-none">{solarTimes.ishaLT}</span>
-                                                <span className="text-[9px] text-stone-500 font-bold bg-stone-200 px-1 rounded">LT</span>
-                                            </div>
-                                            <span className="text-[10px] font-mono text-stone-400">{solarTimes.ishaUTC} UTC</span>
-                                        </div>
-                                    </div>
+                        {/* Nautische Klok & Vasten Ritme */}
+                        <section className={`p-6 rounded-2xl shadow-sm border relative overflow-hidden transition-colors duration-500 ${nextEvent === 'Iftar' ? 'bg-emerald-50/50 border-emerald-100' : 'bg-white border-stone-200'}`}>
+                            <h2 className="text-lg font-medium text-stone-700 flex items-center gap-2 mb-4 relative z-10">
+                                <Clock size={20} className="text-emerald-700" />
+                                {t.fastTitleFallback}
+                            </h2>
+                            
+                            {solarDates ? (
+                                renderDial()
+                            ) : (
+                                <div className="flex flex-col items-center py-8 text-center">
+                                    <p className="text-sm font-medium text-emerald-800 bg-emerald-100/50 py-1.5 px-3 rounded-full">
+                                        {t.waitingForLoc}
+                                    </p>
                                 </div>
                             )}
                         </section>
 
-                        <section className={`p-6 rounded-2xl shadow-sm border relative overflow-hidden transition-colors duration-500 ${nextEvent === 'Iftar' ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-stone-200'}`}>
-                            <div className="absolute -top-4 -right-4 p-4 opacity-5 text-emerald-900 pointer-events-none">
-                                {nextEvent === 'Iftar' ? <Sun size={140} /> : <Moon size={140} />}
-                            </div>
-                            
-                            <h2 className="text-lg font-medium text-stone-700 flex items-center gap-2 mb-4 relative z-10">
-                                <Clock size={20} className="text-emerald-700" />
-                                {nextEvent === 'Fajr' ? t.timeTillFajr : (nextEvent === 'Iftar' ? t.timeTillIftar : t.fastTitleFallback)}
-                            </h2>
-                            
-                            <div className="flex flex-col items-center py-6 relative z-10">
-                                <p className="text-5xl font-light text-stone-800 mb-3 tracking-wider tabular-nums font-mono drop-shadow-sm">{countdown}</p>
-                                <p className="text-sm font-medium text-emerald-800 text-center px-4 bg-emerald-100/50 py-1.5 px-3 rounded-full">
-                                    {!solarDates ? t.waitingForLoc : (nextEvent === 'Fajr' ? t.waitingFajr : t.waitingIftar)}
-                                </p>
-                            </div>
-                        </section>
-
+                        {/* Dagboek / Reflectie */}
                         <section className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-lg font-medium text-stone-700 flex items-center gap-2">
@@ -544,7 +553,6 @@
         root.render(<App />);
     </script>
 
-    <!-- Service Worker Registratie voor PWA (Offline & Installatie) -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
