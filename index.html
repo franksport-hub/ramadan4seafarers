@@ -16,6 +16,8 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="https://unpkg.com/adhan@4.3.3/lib/adhan.umd.js"></script>
 </head>
 <body class="bg-stone-100">
     <div id="root"></div>
@@ -59,8 +61,7 @@
                 refPlaceholder: "Schrijf hier je intentie (Niyyah), gedachten of gebeden...",
                 entriesTitle: "Opgeslagen Notities",
                 msgSuccess: "Tijden succesvol berekend via Adhan-methode.",
-                msgErrorCalc: "Kon de tijden niet berekenen.",
-                msgNetError: "Netwerkfout: verbinding met server mislukt.",
+                msgErrorCalc: "Kon de tijden niet berekenen voor deze locatie.",
                 msgGPSLocating: "GPS zoeken...",
                 msgGPSFail: "GPS faalde. Voer handmatig in.",
                 msgGPSNoSupport: "GPS niet ondersteund.",
@@ -85,8 +86,7 @@
                 refPlaceholder: "Write your intention (Niyyah), thoughts or prayers here...",
                 entriesTitle: "Saved Notes",
                 msgSuccess: "Times calculated via Adhan method successfully.",
-                msgErrorCalc: "Could not calculate times.",
-                msgNetError: "Network error: API connection failed.",
+                msgErrorCalc: "Could not calculate times for this location.",
                 msgGPSLocating: "Locating GPS...",
                 msgGPSFail: "GPS failed. Enter manually.",
                 msgGPSNoSupport: "GPS not supported.",
@@ -112,23 +112,35 @@
         };
 
         function App() {
+            // Kogelvrije taal detector
             const getDeviceLang = () => {
-                const langs = navigator.languages || [navigator.language || navigator.userLanguage];
-                for (let i = 0; i < langs.length; i++) {
-                    const langCode = langs[i].toLowerCase();
-                    if (langCode.startsWith('nl')) return 'nl';
-                    if (langCode.startsWith('en')) return 'en';
-                }
+                try {
+                    const langs = navigator.languages || [navigator.language || navigator.userLanguage];
+                    for (let i = 0; i < langs.length; i++) {
+                        if (langs[i].toLowerCase().startsWith('nl')) return 'nl';
+                        if (langs[i].toLowerCase().startsWith('en')) return 'en';
+                    }
+                } catch(e) {}
                 return 'en';
             };
             
-            const [lang, setLang] = useState(() => localStorage.getItem('appLang') || getDeviceLang());
-            const t = translations[lang];
+            const [lang, setLang] = useState(() => {
+                const l = localStorage.getItem('appLang');
+                return (l === 'nl' || l === 'en') ? l : getDeviceLang();
+            });
+            
+            // Altijd een veilige fallback voor teksten
+            const t = translations[lang] || translations['en'];
 
             const [journalText, setJournalText] = useState('');
             const [entries, setEntries] = useState(() => {
-                const saved = localStorage.getItem('ramadanEntries');
-                return saved ? JSON.parse(saved) : [];
+                try {
+                    const saved = localStorage.getItem('ramadanEntries');
+                    const parsed = saved ? JSON.parse(saved) : [];
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch(e) {
+                    return [];
+                }
             });
 
             useEffect(() => {
@@ -165,12 +177,17 @@
                 localStorage.setItem('lngDir', lngDir);
             }, [latDeg, latMin, latDir, lngDeg, lngMin, lngDir]);
 
+            // Herberekenen op basis van opgeslagen coördinaten met lichte vertraging
             useEffect(() => {
                 if (latDeg !== '' && lngDeg !== '') {
-                    handleManualCalculate();
+                    const timer = setTimeout(() => {
+                        handleManualCalculate();
+                    }, 500);
+                    return () => clearTimeout(timer);
                 }
             }, []);
 
+            // Timer logica
             useEffect(() => {
                 let interval;
                 const updateTimer = () => {
@@ -181,6 +198,14 @@
                         let target;
                         let eventName;
 
+                        // Kogelvrije check op geldige datums
+                        if (!solarDates.fajr || isNaN(solarDates.fajr.getTime()) || 
+                            !solarDates.iftar || isNaN(solarDates.iftar.getTime())) {
+                            setCountdown('--:--:--');
+                            setNextEvent('');
+                            return;
+                        }
+
                         if (now < solarDates.fajr) {
                             target = solarDates.fajr;
                             eventName = 'Fajr';
@@ -188,7 +213,7 @@
                             target = solarDates.iftar;
                             eventName = 'Iftar';
                         } else {
-                            target = new Date(solarDates.fajr.getTime() + 24 * 60 * 60 * 1000);
+                            target = solarDates.nextFajr;
                             eventName = 'Fajr';
                         }
 
@@ -236,50 +261,75 @@
                 setEntries(entries.filter(entry => entry.id !== id));
             };
 
-            // --- DE GEFIXTE ALADHAN BEREKENING ---
-            const fetchSolarTimes = async (latitude, longitude) => {
+            // --- KOGELVRIJE OFFLINE ADHAN BEREKENING ---
+            const calculateOfflineTimes = (latitude, longitude) => {
                 setIsLoadingLocation(true);
                 setLocationMessage('');
+                
                 try {
-                    // Method 3: Muslim World League
-                    // latitudeAdjustmentMethod 2: Seventh of the Night (Dé high latitude correctie!)
-                    const response = await fetch(`https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=3&latitudeAdjustmentMethod=2`);
-                    const json = await response.json();
-                    
-                    if (json.code === 200) {
-                        const times = json.data.timings;
-                        
-                        // DE FIX: Strip overtollige tijdzone tekst zoals "(CET)" weg!
-                        const createDate = (timeStr) => {
-                            const cleanTime = timeStr.split(' ')[0]; // Pakt alleen "05:25"
-                            const [hours, minutes] = cleanTime.split(':').map(Number);
-                            const d = new Date();
-                            d.setHours(hours, minutes, 0, 0);
-                            return d;
-                        };
-
-                        const fajr = createDate(times.Fajr);
-                        const dhuhr = createDate(times.Dhuhr);
-                        const asr = createDate(times.Asr);
-                        const maghrib = createDate(times.Maghrib);
-                        const isha = createDate(times.Isha);
-
-                        setSolarDates({ fajr, dhuhr, asr, maghrib, isha, iftar: maghrib });
-                        
-                        setSolarTimes({
-                            fajrLT: times.Fajr.split(' ')[0],
-                            dhuhrLT: times.Dhuhr.split(' ')[0],
-                            asrLT: times.Asr.split(' ')[0],
-                            maghribLT: times.Maghrib.split(' ')[0],
-                            ishaLT: times.Isha.split(' ')[0]
-                        });
-                        setLocationMessage(t.msgSuccess);
-                    } else {
-                        setLocationMessage(t.msgErrorCalc);
+                    // Check of het script van het internet in de <head> succesvol is geladen
+                    if (typeof window.adhan === 'undefined') {
+                        throw new Error("Adhan module laadt nog... druk nogmaals op Bereken.");
                     }
+
+                    const latNum = Number(latitude);
+                    const lngNum = Number(longitude);
+                    
+                    if (isNaN(latNum) || isNaN(lngNum)) {
+                        throw new Error("Ongeldige cijfers voor coördinaten.");
+                    }
+
+                    const coordinates = new adhan.Coordinates(latNum, lngNum);
+                    const date = new Date();
+                    
+                    // Muslim World League (standaard)
+                    const params = adhan.CalculationMethod.MuslimWorldLeague();
+                    
+                    // DE MAGIE VOOR NOORWEGEN / Hoge of Lage Breedtegraden (Seventh of the Night)
+                    params.highLatitudeRule = adhan.HighLatitudeRule.SeventhOfTheNight; 
+
+                    const prayerTimes = new adhan.PrayerTimes(coordinates, date, params);
+                    
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const tomorrowTimes = new adhan.PrayerTimes(coordinates, tomorrow, params);
+
+                    // Check of de berekening echt gelukt is (voorkomt lege tijden)
+                    if (!prayerTimes.fajr || !prayerTimes.maghrib) {
+                        throw new Error("Zonnetijden konden niet wiskundig bepaald worden voor deze datum/locatie.");
+                    }
+
+                    setSolarDates({ 
+                        fajr: prayerTimes.fajr, 
+                        dhuhr: prayerTimes.dhuhr, 
+                        asr: prayerTimes.asr, 
+                        maghrib: prayerTimes.maghrib, 
+                        isha: prayerTimes.isha, 
+                        iftar: prayerTimes.maghrib,
+                        nextFajr: tomorrowTimes.fajr 
+                    });
+                    
+                    const deviceLocale = navigator.language || 'en-US';
+                    const timeOpts = { hour: '2-digit', minute: '2-digit' };
+
+                    // Een veilige weergave van tijd: is de data leeg? Dan streepjes.
+                    const safeTime = (dateObj) => {
+                        if (!dateObj || isNaN(dateObj.getTime())) return '--:--';
+                        return dateObj.toLocaleTimeString(deviceLocale, timeOpts);
+                    };
+
+                    setSolarTimes({
+                        fajrLT: safeTime(prayerTimes.fajr),
+                        dhuhrLT: safeTime(prayerTimes.dhuhr),
+                        asrLT: safeTime(prayerTimes.asr),
+                        maghribLT: safeTime(prayerTimes.maghrib),
+                        ishaLT: safeTime(prayerTimes.isha)
+                    });
+
+                    setLocationMessage(t.msgSuccess);
                 } catch (error) {
-                    console.error("Fout bij ophalen:", error);
-                    setLocationMessage(t.msgNetError);
+                    console.error("Berekeningsfout:", error);
+                    setLocationMessage(error.message || t.msgErrorCalc);
                 }
                 setIsLoadingLocation(false);
             };
@@ -305,7 +355,7 @@
                             setLngMin(((absLng - Math.floor(absLng)) * 60).toFixed(2));
                             setLngDir(isLngE ? 'E' : 'W');
 
-                            fetchSolarTimes(currentLat, currentLng);
+                            calculateOfflineTimes(currentLat, currentLng);
                         },
                         (error) => {
                             setLocationMessage(t.msgGPSFail);
@@ -326,7 +376,7 @@
                     if (lngDir === 'W') calcLng = -calcLng;
 
                     if (!isNaN(calcLat) && !isNaN(calcLng)) {
-                        fetchSolarTimes(calcLat, calcLng);
+                        calculateOfflineTimes(calcLat, calcLng);
                     } else {
                         setLocationMessage(t.msgErrorCalc);
                     }
@@ -339,7 +389,8 @@
                 if (!solarDates || !solarTimes) return null;
 
                 const getCoords = (date, radiusOffset = 0) => {
-                    if (!date) return { x: 140, y: 140 };
+                    // Nog een extra veiligheids-check
+                    if (!date || isNaN(date.getTime())) return { x: 140, y: 140 };
                     const hours = date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
                     const radians = (hours / 24) * 2 * Math.PI + Math.PI;
                     const r = 90 + radiusOffset;
