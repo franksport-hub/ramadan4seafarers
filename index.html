@@ -16,8 +16,6 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/adhan@4.3.3/lib/adhan.umd.js"></script>
 </head>
 <body class="bg-stone-100">
     <div id="root"></div>
@@ -60,8 +58,9 @@
                 refTitle: "Notities & Intenties",
                 refPlaceholder: "Schrijf hier je intentie (Niyyah), gedachten of gebeden...",
                 entriesTitle: "Opgeslagen Notities",
-                msgSuccess: "Tijden berekend via Adhan (incl. Hoge Breedtegraden).",
+                msgSuccess: "Tijden succesvol berekend via Adhan-methode.",
                 msgErrorCalc: "Kon de tijden niet berekenen.",
+                msgNetError: "Netwerkfout: verbinding met server mislukt.",
                 msgGPSLocating: "GPS zoeken...",
                 msgGPSFail: "GPS faalde. Voer handmatig in.",
                 msgGPSNoSupport: "GPS niet ondersteund.",
@@ -85,8 +84,9 @@
                 refTitle: "Notes & Intentions",
                 refPlaceholder: "Write your intention (Niyyah), thoughts or prayers here...",
                 entriesTitle: "Saved Notes",
-                msgSuccess: "Times calculated via Adhan (incl. High Latitude).",
+                msgSuccess: "Times calculated via Adhan method successfully.",
                 msgErrorCalc: "Could not calculate times.",
+                msgNetError: "Network error: API connection failed.",
                 msgGPSLocating: "Locating GPS...",
                 msgGPSFail: "GPS failed. Enter manually.",
                 msgGPSNoSupport: "GPS not supported.",
@@ -101,21 +101,13 @@
                 "Waar ben ik vandaag het meest dankbaar voor te midden van deze uitgestrekte oceaan?",
                 "Welke oprechte intentie (Niyyah) zet ik voor deze dag?",
                 "De zee is uitgestrekt en geduldig. Hoe kan ik vandaag zelf geduld oefenen?",
-                "Een moment van stilte voor de mensen thuis. Wat wens ik ze toe?",
-                "Zoals de golven komen en gaan, zo komen ook gedachten. Welke gedachte mag ik vandaag loslaten?",
-                "Wat is mijn persoonlijke kompas of drijfveer vandaag?",
-                "In de stilte van de nachtwacht vind ik rust. Wat leert deze stilte mij?",
-                "Welke kleine daad van vriendelijkheid kan ik vandaag voor de bemanning doen?"
+                "Een moment van stilte voor de mensen thuis. Wat wens ik ze toe?"
             ],
             en: [
                 "What am I most grateful for today amidst this vast ocean?",
                 "What sincere intention (Niyyah) am I setting for this day?",
                 "The sea is vast and patient. How can I practice patience today?",
-                "A moment of silence for loved ones at home. What do I wish for them?",
-                "Just as waves come and go, so do thoughts. Which thought can I let go of today?",
-                "What is my personal compass or motivation today?",
-                "In the quiet of the night watch, I find peace. What does this silence teach me?",
-                "What small act of kindness can I do for my crew today?"
+                "A moment of silence for loved ones at home. What do I wish for them?"
             ]
         };
 
@@ -173,7 +165,12 @@
                 localStorage.setItem('lngDir', lngDir);
             }, [latDeg, latMin, latDir, lngDeg, lngMin, lngDir]);
 
-            // Timer logica
+            useEffect(() => {
+                if (latDeg !== '' && lngDeg !== '') {
+                    handleManualCalculate();
+                }
+            }, []);
+
             useEffect(() => {
                 let interval;
                 const updateTimer = () => {
@@ -191,12 +188,11 @@
                             target = solarDates.iftar;
                             eventName = 'Iftar';
                         } else {
-                            // De app pakt exact de berekende Fajr van 'morgen'
-                            target = solarDates.nextFajr;
+                            target = new Date(solarDates.fajr.getTime() + 24 * 60 * 60 * 1000);
                             eventName = 'Fajr';
                         }
 
-                        if (!target) return;
+                        if (!target || isNaN(target.getTime())) return;
 
                         const diff = target - now;
                         if (diff <= 0) {
@@ -240,68 +236,50 @@
                 setEntries(entries.filter(entry => entry.id !== id));
             };
 
-            const generateRandomPrompt = () => {
-                const promptList = humanistPrompts[lang];
-                const randomPrompt = promptList[Math.floor(Math.random() * promptList.length)];
-                setJournalText(prev => prev ? prev + '\n\n' + randomPrompt : randomPrompt);
-            };
-
-            // --- DE OFFLINE ADHAN BEREKENING ---
-            const calculateOfflineTimes = (latitude, longitude) => {
+            // --- DE GEFIXTE ALADHAN BEREKENING ---
+            const fetchSolarTimes = async (latitude, longitude) => {
                 setIsLoadingLocation(true);
                 setLocationMessage('');
-                
                 try {
-                    // Check of het bestand echt is ingeladen door de browser
-                    if (!window.adhan) {
-                        throw new Error("Adhan library kon niet geladen worden.");
+                    // Method 3: Muslim World League
+                    // latitudeAdjustmentMethod 2: Seventh of the Night (Dé high latitude correctie!)
+                    const response = await fetch(`https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=3&latitudeAdjustmentMethod=2`);
+                    const json = await response.json();
+                    
+                    if (json.code === 200) {
+                        const times = json.data.timings;
+                        
+                        // DE FIX: Strip overtollige tijdzone tekst zoals "(CET)" weg!
+                        const createDate = (timeStr) => {
+                            const cleanTime = timeStr.split(' ')[0]; // Pakt alleen "05:25"
+                            const [hours, minutes] = cleanTime.split(':').map(Number);
+                            const d = new Date();
+                            d.setHours(hours, minutes, 0, 0);
+                            return d;
+                        };
+
+                        const fajr = createDate(times.Fajr);
+                        const dhuhr = createDate(times.Dhuhr);
+                        const asr = createDate(times.Asr);
+                        const maghrib = createDate(times.Maghrib);
+                        const isha = createDate(times.Isha);
+
+                        setSolarDates({ fajr, dhuhr, asr, maghrib, isha, iftar: maghrib });
+                        
+                        setSolarTimes({
+                            fajrLT: times.Fajr.split(' ')[0],
+                            dhuhrLT: times.Dhuhr.split(' ')[0],
+                            asrLT: times.Asr.split(' ')[0],
+                            maghribLT: times.Maghrib.split(' ')[0],
+                            ishaLT: times.Isha.split(' ')[0]
+                        });
+                        setLocationMessage(t.msgSuccess);
+                    } else {
+                        setLocationMessage(t.msgErrorCalc);
                     }
-
-                    // Zet altijd expliciet om naar cijfers
-                    const latNum = Number(latitude);
-                    const lngNum = Number(longitude);
-                    
-                    const coordinates = new adhan.Coordinates(latNum, lngNum);
-                    const date = new Date();
-                    
-                    // Muslim World League wordt wereldwijd het meest geaccepteerd als betrouwbare basis
-                    const params = adhan.CalculationMethod.MuslimWorldLeague();
-                    
-                    // DE MAGIE VOOR NOORWEGEN / Hoge Breedtegraden
-                    params.highLatitudeRule = adhan.HighLatitudeRule.SeventhOfTheNight; 
-
-                    const prayerTimes = new adhan.PrayerTimes(coordinates, date, params);
-                    
-                    // Bereken ook voor morgen
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    const tomorrowTimes = new adhan.PrayerTimes(coordinates, tomorrow, params);
-
-                    setSolarDates({ 
-                        fajr: prayerTimes.fajr, 
-                        dhuhr: prayerTimes.dhuhr, 
-                        asr: prayerTimes.asr, 
-                        maghrib: prayerTimes.maghrib, 
-                        isha: prayerTimes.isha, 
-                        iftar: prayerTimes.maghrib,
-                        nextFajr: tomorrowTimes.fajr 
-                    });
-                    
-                    const deviceLocale = navigator.language || 'en-US';
-                    const timeOpts = { hour: '2-digit', minute: '2-digit' };
-
-                    setSolarTimes({
-                        fajrLT: prayerTimes.fajr.toLocaleTimeString(deviceLocale, timeOpts),
-                        dhuhrLT: prayerTimes.dhuhr.toLocaleTimeString(deviceLocale, timeOpts),
-                        asrLT: prayerTimes.asr.toLocaleTimeString(deviceLocale, timeOpts),
-                        maghribLT: prayerTimes.maghrib.toLocaleTimeString(deviceLocale, timeOpts),
-                        ishaLT: prayerTimes.isha.toLocaleTimeString(deviceLocale, timeOpts)
-                    });
-
-                    setLocationMessage(t.msgSuccess);
                 } catch (error) {
-                    console.error("Fout bij berekenen:", error);
-                    setLocationMessage(t.msgErrorCalc);
+                    console.error("Fout bij ophalen:", error);
+                    setLocationMessage(t.msgNetError);
                 }
                 setIsLoadingLocation(false);
             };
@@ -327,7 +305,7 @@
                             setLngMin(((absLng - Math.floor(absLng)) * 60).toFixed(2));
                             setLngDir(isLngE ? 'E' : 'W');
 
-                            calculateOfflineTimes(currentLat, currentLng);
+                            fetchSolarTimes(currentLat, currentLng);
                         },
                         (error) => {
                             setLocationMessage(t.msgGPSFail);
@@ -348,7 +326,7 @@
                     if (lngDir === 'W') calcLng = -calcLng;
 
                     if (!isNaN(calcLat) && !isNaN(calcLng)) {
-                        calculateOfflineTimes(calcLat, calcLng);
+                        fetchSolarTimes(calcLat, calcLng);
                     } else {
                         setLocationMessage(t.msgErrorCalc);
                     }
