@@ -12,9 +12,12 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/adhan@4.3.3/lib/adhan.umd.js"></script>
 </head>
 <body class="bg-stone-100">
     <div id="root"></div>
@@ -57,9 +60,8 @@
                 refTitle: "Notities & Intenties",
                 refPlaceholder: "Schrijf hier je intentie (Niyyah), gedachten of gebeden...",
                 entriesTitle: "Opgeslagen Notities",
-                msgSuccess: "Tijden berekend op basis van astronomische schemering.",
+                msgSuccess: "Offline berekend, inclusief noordelijke correcties.",
                 msgErrorCalc: "Kon de tijden niet berekenen.",
-                msgNetError: "Netwerkfout bij het ophalen.",
                 msgGPSLocating: "GPS zoeken...",
                 msgGPSFail: "GPS faalde. Voer handmatig in.",
                 msgGPSNoSupport: "GPS niet ondersteund.",
@@ -83,9 +85,8 @@
                 refTitle: "Notes & Intentions",
                 refPlaceholder: "Write your intention (Niyyah), thoughts or prayers here...",
                 entriesTitle: "Saved Notes",
-                msgSuccess: "Times calculated based on astronomical twilight.",
+                msgSuccess: "Calculated offline, including high latitude corrections.",
                 msgErrorCalc: "Could not calculate times.",
-                msgNetError: "Network error during fetch.",
                 msgGPSLocating: "Locating GPS...",
                 msgGPSFail: "GPS failed. Enter manually.",
                 msgGPSNoSupport: "GPS not supported.",
@@ -195,12 +196,14 @@
                             target = solarDates.iftar;
                             eventName = 'Iftar';
                         } else {
-                            target = new Date(solarDates.fajr.getTime() + 24 * 60 * 60 * 1000);
+                            // Nu gebruiken we wiskundig de échte Fajr van morgen!
+                            target = solarDates.nextFajr;
                             eventName = 'Fajr';
                         }
 
                         const diff = target - now;
                         if (diff <= 0) {
+                            // Als het doel bereikt is, even wachten en de app zal zichzelf herberekenen bij interactie
                             setCountdown('00:00:00');
                             return;
                         }
@@ -241,47 +244,58 @@
                 setEntries(entries.filter(entry => entry.id !== id));
             };
 
-            const generateRandomPrompt = () => {
-                const promptList = humanistPrompts[lang];
-                const randomPrompt = promptList[Math.floor(Math.random() * promptList.length)];
-                setJournalText(prev => prev ? prev + '\n\n' + randomPrompt : randomPrompt);
-            };
-
-            const fetchSolarTimes = async (latitude, longitude) => {
+            // DE NIEUWE OFFLINE BEREKENING MET ADHAN.JS
+            const calculateOfflineTimes = (latitude, longitude) => {
                 setIsLoadingLocation(true);
                 setLocationMessage('');
                 try {
-                    // TERUG NAAR DE ORIGINELE API (Sunrise-Sunset.org)
-                    const response = await fetch(`https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`);
-                    const data = await response.json();
-                    
-                    if (data.status === 'OK') {
-                        const dawn = new Date(data.results.astronomical_twilight_begin);
-                        const dhuhr = new Date(data.results.solar_noon);
-                        const sunset = new Date(data.results.sunset);
-                        const isha = new Date(data.results.astronomical_twilight_end);
-                        
-                        const asrTimeMs = dhuhr.getTime() + (sunset.getTime() - dhuhr.getTime()) * 0.55;
-                        const asr = new Date(asrTimeMs);
-
-                        setSolarDates({ fajr: dawn, dhuhr, asr, maghrib: sunset, isha, iftar: sunset });
-                        
-                        const deviceLocale = navigator.language || 'en-US';
-                        const timeOpts = { hour: '2-digit', minute: '2-digit' };
-
-                        setSolarTimes({
-                            fajrLT: dawn.toLocaleTimeString(deviceLocale, timeOpts),
-                            dhuhrLT: dhuhr.toLocaleTimeString(deviceLocale, timeOpts),
-                            asrLT: asr.toLocaleTimeString(deviceLocale, timeOpts),
-                            maghribLT: sunset.toLocaleTimeString(deviceLocale, timeOpts),
-                            ishaLT: isha.toLocaleTimeString(deviceLocale, timeOpts)
-                        });
-                        setLocationMessage(t.msgSuccess);
-                    } else {
-                        setLocationMessage(t.msgErrorCalc);
+                    if (typeof adhan === 'undefined') {
+                        throw new Error("Adhan library niet geladen.");
                     }
+
+                    const coordinates = new adhan.Coordinates(latitude, longitude);
+                    const date = new Date();
+                    
+                    // We gebruiken MuslimWorldLeague omdat deze de standaard is voor veel regio's
+                    const params = adhan.CalculationMethod.MuslimWorldLeague();
+                    
+                    // DE MAGIE VOOR NOORWEGEN: High Latitude Rule! 
+                    // Dit zorgt ervoor dat Fajr/Isha correct worden berekend als de zon niet ver genoeg zakt.
+                    params.highLatitudeRule = adhan.HighLatitudeRule.SeventhOfTheNight; 
+
+                    // Bereken tijden voor vandaag
+                    const prayerTimes = new adhan.PrayerTimes(coordinates, date, params);
+                    
+                    // Bereken tijden voor morgen (zodat de countdown na Maghrib exact klopt)
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const tomorrowTimes = new adhan.PrayerTimes(coordinates, tomorrow, params);
+
+                    setSolarDates({ 
+                        fajr: prayerTimes.fajr, 
+                        dhuhr: prayerTimes.dhuhr, 
+                        asr: prayerTimes.asr, 
+                        maghrib: prayerTimes.maghrib, 
+                        isha: prayerTimes.isha, 
+                        iftar: prayerTimes.maghrib,
+                        nextFajr: tomorrowTimes.fajr // Sla morgen's Fajr op voor de timer
+                    });
+                    
+                    const deviceLocale = navigator.language || 'en-US';
+                    const timeOpts = { hour: '2-digit', minute: '2-digit' };
+
+                    setSolarTimes({
+                        fajrLT: prayerTimes.fajr.toLocaleTimeString(deviceLocale, timeOpts),
+                        dhuhrLT: prayerTimes.dhuhr.toLocaleTimeString(deviceLocale, timeOpts),
+                        asrLT: prayerTimes.asr.toLocaleTimeString(deviceLocale, timeOpts),
+                        maghribLT: prayerTimes.maghrib.toLocaleTimeString(deviceLocale, timeOpts),
+                        ishaLT: prayerTimes.isha.toLocaleTimeString(deviceLocale, timeOpts)
+                    });
+
+                    setLocationMessage(t.msgSuccess);
                 } catch (error) {
-                    setLocationMessage(t.msgNetError);
+                    console.error(error);
+                    setLocationMessage(t.msgErrorCalc);
                 }
                 setIsLoadingLocation(false);
             };
@@ -307,7 +321,7 @@
                             setLngMin(((absLng - Math.floor(absLng)) * 60).toFixed(2));
                             setLngDir(isLngE ? 'E' : 'W');
 
-                            fetchSolarTimes(currentLat, currentLng);
+                            calculateOfflineTimes(currentLat, currentLng);
                         },
                         (error) => {
                             setLocationMessage(t.msgGPSFail);
@@ -327,7 +341,7 @@
                     let calcLng = parseInt(lngDeg) + (parseFloat(lngMin) / 60);
                     if (lngDir === 'W') calcLng = -calcLng;
 
-                    fetchSolarTimes(calcLat, calcLng);
+                    calculateOfflineTimes(calcLat, calcLng);
                 } else {
                     setLocationMessage(t.msgManualFillAll);
                 }
