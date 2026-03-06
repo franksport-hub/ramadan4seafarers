@@ -17,7 +17,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/adhan@4.3.3/lib/adhan.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/adhan/4.4.3/adhan.umd.min.js"></script>
 </head>
 <body class="bg-stone-100">
     <div id="root"></div>
@@ -173,12 +173,17 @@
                 localStorage.setItem('lngDir', lngDir);
             }, [latDeg, latMin, latDir, lngDeg, lngMin, lngDir]);
 
+            // Automatisch berekenen als we al coördinaten hebben
             useEffect(() => {
                 if (latDeg !== '' && lngDeg !== '') {
-                    handleManualCalculate();
+                    // Geef de wiskunde-module heel even de tijd om te laden vanuit de <head>
+                    setTimeout(() => {
+                        handleManualCalculate();
+                    }, 500);
                 }
             }, []);
 
+            // Timer logica
             useEffect(() => {
                 let interval;
                 const updateTimer = () => {
@@ -196,14 +201,15 @@
                             target = solarDates.iftar;
                             eventName = 'Iftar';
                         } else {
-                            // Nu gebruiken we wiskundig de échte Fajr van morgen!
+                            // Wiskundig de échte Fajr van morgen
                             target = solarDates.nextFajr;
                             eventName = 'Fajr';
                         }
 
+                        if (!target) return; // Veiligheid inbouwen als datum faalt
+
                         const diff = target - now;
                         if (diff <= 0) {
-                            // Als het doel bereikt is, even wachten en de app zal zichzelf herberekenen bij interactie
                             setCountdown('00:00:00');
                             return;
                         }
@@ -244,29 +250,32 @@
                 setEntries(entries.filter(entry => entry.id !== id));
             };
 
-            // DE NIEUWE OFFLINE BEREKENING MET ADHAN.JS
+            const generateRandomPrompt = () => {
+                const promptList = humanistPrompts[lang];
+                const randomPrompt = promptList[Math.floor(Math.random() * promptList.length)];
+                setJournalText(prev => prev ? prev + '\n\n' + randomPrompt : randomPrompt);
+            };
+
+            // --- DE OFFLINE ADHAN BEREKENING ---
             const calculateOfflineTimes = (latitude, longitude) => {
                 setIsLoadingLocation(true);
                 setLocationMessage('');
+                
                 try {
+                    // Check of de module echt geladen is (voorkomt crash!)
                     if (typeof adhan === 'undefined') {
-                        throw new Error("Adhan library niet geladen.");
+                        throw new Error("Adhan rekenmodule is niet gevonden. Controleer de netwerkverbinding.");
                     }
 
                     const coordinates = new adhan.Coordinates(latitude, longitude);
                     const date = new Date();
                     
-                    // We gebruiken MuslimWorldLeague omdat deze de standaard is voor veel regio's
                     const params = adhan.CalculationMethod.MuslimWorldLeague();
-                    
                     // DE MAGIE VOOR NOORWEGEN: High Latitude Rule! 
-                    // Dit zorgt ervoor dat Fajr/Isha correct worden berekend als de zon niet ver genoeg zakt.
                     params.highLatitudeRule = adhan.HighLatitudeRule.SeventhOfTheNight; 
 
-                    // Bereken tijden voor vandaag
                     const prayerTimes = new adhan.PrayerTimes(coordinates, date, params);
                     
-                    // Bereken tijden voor morgen (zodat de countdown na Maghrib exact klopt)
                     const tomorrow = new Date();
                     tomorrow.setDate(tomorrow.getDate() + 1);
                     const tomorrowTimes = new adhan.PrayerTimes(coordinates, tomorrow, params);
@@ -278,7 +287,7 @@
                         maghrib: prayerTimes.maghrib, 
                         isha: prayerTimes.isha, 
                         iftar: prayerTimes.maghrib,
-                        nextFajr: tomorrowTimes.fajr // Sla morgen's Fajr op voor de timer
+                        nextFajr: tomorrowTimes.fajr 
                     });
                     
                     const deviceLocale = navigator.language || 'en-US';
@@ -294,7 +303,7 @@
 
                     setLocationMessage(t.msgSuccess);
                 } catch (error) {
-                    console.error(error);
+                    console.error("Fout bij berekenen: ", error);
                     setLocationMessage(t.msgErrorCalc);
                 }
                 setIsLoadingLocation(false);
@@ -341,14 +350,18 @@
                     let calcLng = parseInt(lngDeg) + (parseFloat(lngMin) / 60);
                     if (lngDir === 'W') calcLng = -calcLng;
 
-                    calculateOfflineTimes(calcLat, calcLng);
+                    if (!isNaN(calcLat) && !isNaN(calcLng)) {
+                        calculateOfflineTimes(calcLat, calcLng);
+                    } else {
+                        setLocationMessage(t.msgErrorCalc);
+                    }
                 } else {
                     setLocationMessage(t.msgManualFillAll);
                 }
             };
 
             const renderDial = () => {
-                if (!solarDates) return null;
+                if (!solarDates || !solarTimes) return null;
 
                 const getCoords = (date, radiusOffset = 0) => {
                     if (!date) return { x: 140, y: 140 };
