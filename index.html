@@ -17,7 +17,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/adhan/4.4.3/adhan.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/adhan@4.3.3/lib/adhan.umd.js"></script>
 </head>
 <body class="bg-stone-100">
     <div id="root"></div>
@@ -60,7 +60,7 @@
                 refTitle: "Notities & Intenties",
                 refPlaceholder: "Schrijf hier je intentie (Niyyah), gedachten of gebeden...",
                 entriesTitle: "Opgeslagen Notities",
-                msgSuccess: "Offline berekend, inclusief noordelijke correcties.",
+                msgSuccess: "Tijden berekend via Adhan (incl. Hoge Breedtegraden).",
                 msgErrorCalc: "Kon de tijden niet berekenen.",
                 msgGPSLocating: "GPS zoeken...",
                 msgGPSFail: "GPS faalde. Voer handmatig in.",
@@ -85,7 +85,7 @@
                 refTitle: "Notes & Intentions",
                 refPlaceholder: "Write your intention (Niyyah), thoughts or prayers here...",
                 entriesTitle: "Saved Notes",
-                msgSuccess: "Calculated offline, including high latitude corrections.",
+                msgSuccess: "Times calculated via Adhan (incl. High Latitude).",
                 msgErrorCalc: "Could not calculate times.",
                 msgGPSLocating: "Locating GPS...",
                 msgGPSFail: "GPS failed. Enter manually.",
@@ -173,16 +173,6 @@
                 localStorage.setItem('lngDir', lngDir);
             }, [latDeg, latMin, latDir, lngDeg, lngMin, lngDir]);
 
-            // Automatisch berekenen als we al coördinaten hebben
-            useEffect(() => {
-                if (latDeg !== '' && lngDeg !== '') {
-                    // Geef de wiskunde-module heel even de tijd om te laden vanuit de <head>
-                    setTimeout(() => {
-                        handleManualCalculate();
-                    }, 500);
-                }
-            }, []);
-
             // Timer logica
             useEffect(() => {
                 let interval;
@@ -201,12 +191,12 @@
                             target = solarDates.iftar;
                             eventName = 'Iftar';
                         } else {
-                            // Wiskundig de échte Fajr van morgen
+                            // De app pakt exact de berekende Fajr van 'morgen'
                             target = solarDates.nextFajr;
                             eventName = 'Fajr';
                         }
 
-                        if (!target) return; // Veiligheid inbouwen als datum faalt
+                        if (!target) return;
 
                         const diff = target - now;
                         if (diff <= 0) {
@@ -262,20 +252,27 @@
                 setLocationMessage('');
                 
                 try {
-                    // Check of de module echt geladen is (voorkomt crash!)
-                    if (typeof adhan === 'undefined') {
-                        throw new Error("Adhan rekenmodule is niet gevonden. Controleer de netwerkverbinding.");
+                    // Check of het bestand echt is ingeladen door de browser
+                    if (!window.adhan) {
+                        throw new Error("Adhan library kon niet geladen worden.");
                     }
 
-                    const coordinates = new adhan.Coordinates(latitude, longitude);
+                    // Zet altijd expliciet om naar cijfers
+                    const latNum = Number(latitude);
+                    const lngNum = Number(longitude);
+                    
+                    const coordinates = new adhan.Coordinates(latNum, lngNum);
                     const date = new Date();
                     
+                    // Muslim World League wordt wereldwijd het meest geaccepteerd als betrouwbare basis
                     const params = adhan.CalculationMethod.MuslimWorldLeague();
-                    // DE MAGIE VOOR NOORWEGEN: High Latitude Rule! 
+                    
+                    // DE MAGIE VOOR NOORWEGEN / Hoge Breedtegraden
                     params.highLatitudeRule = adhan.HighLatitudeRule.SeventhOfTheNight; 
 
                     const prayerTimes = new adhan.PrayerTimes(coordinates, date, params);
                     
+                    // Bereken ook voor morgen
                     const tomorrow = new Date();
                     tomorrow.setDate(tomorrow.getDate() + 1);
                     const tomorrowTimes = new adhan.PrayerTimes(coordinates, tomorrow, params);
@@ -303,7 +300,7 @@
 
                     setLocationMessage(t.msgSuccess);
                 } catch (error) {
-                    console.error("Fout bij berekenen: ", error);
+                    console.error("Fout bij berekenen:", error);
                     setLocationMessage(t.msgErrorCalc);
                 }
                 setIsLoadingLocation(false);
