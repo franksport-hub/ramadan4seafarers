@@ -1,4 +1,4 @@
-const CACHE_NAME = 'reflectie-gids-v1';
+const CACHE_NAME = 'Islam at sea - V1';
 
 // Deze bestanden worden direct gedownload en bewaard voor offline gebruik
 const ASSETS_TO_CACHE = [
