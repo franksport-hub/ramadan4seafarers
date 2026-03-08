@@ -50,7 +50,7 @@
                 btnGPSOff: "GPS",
                 btnCalc: "Bereken",
                 fajr: "Fajr", sunrise: "Opkomst", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha",
-                timeTillFajr: "Tijd tot Fajr", timeTillIftar: "Tijd tot Iftar",
+                timeTillFajr: "Tijd tot Fajr", timeTillMaghrib: "Tijd tot Maghrib",
                 waitingForLoc: "Geef een locatie op of activeer GPS...",
                 refTitle: "Notities & Intenties",
                 refPlaceholder: "Schrijf hier je gedachten...",
@@ -74,8 +74,8 @@
                 btnGPS: "Active",
                 btnGPSOff: "GPS",
                 btnCalc: "Calc",
-                fajr: "Fajr", sunrise: "Sunrise", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Iftar", isha: "Isha",
-                timeTillFajr: "Time till Fajr", timeTillIftar: "Time till Iftar",
+                fajr: "Fajr", sunrise: "Sunrise", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha",
+                timeTillFajr: "Time till Fajr", timeTillMaghrib: "Time till Maghrib",
                 waitingForLoc: "Enter a location or activate GPS...",
                 refTitle: "Notes & Intentions",
                 refPlaceholder: "Write your thoughts...",
@@ -111,11 +111,9 @@
             const [countdown, setCountdown] = useState('--:--:--');
             const [nextEvent, setNextEvent] = useState('');
             
-            // UI State
             const [showInfo, setShowInfo] = useState(false);
             const [fallbackApplied, setFallbackApplied] = useState({ fajr: false, isha: false });
 
-            // Positie State
             const [latDeg, setLatDeg] = useState(() => localStorage.getItem('latDeg') || '');
             const [latMin, setLatMin] = useState(() => localStorage.getItem('latMin') || '');
             const [latDir, setLatDir] = useState(() => localStorage.getItem('latDir') || 'N');
@@ -123,7 +121,6 @@
             const [lngMin, setLngMin] = useState(() => localStorage.getItem('lngMin') || '');
             const [lngDir, setLngDir] = useState(() => localStorage.getItem('lngDir') || 'E');
             
-            // Navigatie State
             const [solarTimes, setSolarTimes] = useState(null);
             const [isLoadingLocation, setIsLoadingLocation] = useState(false);
             const [isGpsActive, setIsGpsActive] = useState(false);
@@ -147,7 +144,7 @@
                         const now = new Date();
                         let target, eventName;
                         if (now < solarDates.fajr) { target = solarDates.fajr; eventName = 'Fajr'; }
-                        else if (now < solarDates.iftar) { target = solarDates.iftar; eventName = 'Iftar'; }
+                        else if (now < solarDates.iftar) { target = solarDates.iftar; eventName = 'Maghrib'; }
                         else { target = new Date(solarDates.fajr.getTime() + 86400000); eventName = 'Fajr'; }
                         const diff = target - now;
                         const h = Math.floor(diff / 3600000);
@@ -194,7 +191,6 @@
                             }
                         }
 
-                        // High Latitude Fallback Logica met detectie
                         let dawn = new Date(results.astronomical_twilight_begin);
                         let rise = new Date(results.sunrise);
                         let dhuhr = new Date(results.solar_noon);
@@ -312,8 +308,6 @@
 
             return (
                 <div className="min-h-screen bg-stone-100 text-stone-800 font-sans pb-10">
-                    
-                    {/* INFO MODAL */}
                     {showInfo && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-in fade-in">
                             <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
@@ -354,36 +348,34 @@
 
                     <main className="max-w-md mx-auto px-4 mt-6 space-y-6">
                         <section className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-lg font-medium flex items-center gap-2"><Navigation size={20} className="text-emerald-700" /> {t.navTitle}</h2>
-                            </div>
+                            <h2 className="text-lg font-medium flex items-center gap-2 mb-4"><Navigation size={20} className="text-emerald-700" /> {t.navTitle}</h2>
                             
                             <div className="space-y-3 mb-2">
                                 <div className="flex items-center gap-2 bg-stone-50 p-2 rounded-lg border border-stone-100">
                                     <span className="text-[10px] font-bold w-8 text-stone-400">LAT</span>
-                                    <input type="number" value={latDeg} onChange={e=>setLatDeg(e.target.value)} disabled={isGpsActive} className="w-12 p-1 text-center bg-transparent border-b border-stone-200 focus:border-emerald-500 outline-none disabled:opacity-50" />°
-                                    <input type="number" value={latMin} onChange={e=>setLatMin(e.target.value)} disabled={isGpsActive} className="w-16 p-1 text-center bg-transparent border-b border-stone-200 focus:border-emerald-500 outline-none disabled:opacity-50" />'
-                                    <select value={latDir} onChange={e=>setLatDir(e.target.value)} disabled={isGpsActive} className="bg-transparent font-bold text-emerald-800 disabled:opacity-50"><option>N</option><option>S</option></select>
+                                    <input type="number" value={latDeg} onChange={e=>setLatDeg(e.target.value)} disabled={isGpsActive} className="w-12 p-1 text-center bg-transparent border-b border-stone-200 outline-none disabled:opacity-50" />°
+                                    <input type="number" value={latMin} onChange={e=>setLatMin(e.target.value)} disabled={isGpsActive} className="w-16 p-1 text-center bg-transparent border-b border-stone-200 outline-none disabled:opacity-50" />'
+                                    <select value={latDir} onChange={e=>setLatDir(e.target.value)} disabled={isGpsActive} className="bg-transparent font-bold text-emerald-800"><option>N</option><option>S</option></select>
                                 </div>
                                 <div className="flex items-center gap-2 bg-stone-50 p-2 rounded-lg border border-stone-100">
                                     <span className="text-[10px] font-bold w-8 text-stone-400">LNG</span>
-                                    <input type="number" value={lngDeg} onChange={e=>setLngDeg(e.target.value)} disabled={isGpsActive} className="w-12 p-1 text-center bg-transparent border-b border-stone-200 focus:border-emerald-500 outline-none disabled:opacity-50" />°
-                                    <input type="number" value={lngMin} onChange={e=>setLngMin(e.target.value)} disabled={isGpsActive} className="w-16 p-1 text-center bg-transparent border-b border-stone-200 focus:border-emerald-500 outline-none disabled:opacity-50" />'
-                                    <select value={lngDir} onChange={e=>setLngDir(e.target.value)} disabled={isGpsActive} className="bg-transparent font-bold text-emerald-800 disabled:opacity-50"><option>E</option><option>W</option></select>
+                                    <input type="number" value={lngDeg} onChange={e=>setLngDeg(e.target.value)} disabled={isGpsActive} className="w-12 p-1 text-center bg-transparent border-b border-stone-200 outline-none disabled:opacity-50" />°
+                                    <input type="number" value={lngMin} onChange={e=>setLngMin(e.target.value)} disabled={isGpsActive} className="w-16 p-1 text-center bg-transparent border-b border-stone-200 outline-none disabled:opacity-50" />'
+                                    <select value={lngDir} onChange={e=>setLngDir(e.target.value)} disabled={isGpsActive} className="bg-transparent font-bold text-emerald-800"><option>E</option><option>W</option></select>
                                 </div>
                             </div>
 
-                            <div className={`flex justify-between px-2 text-[10px] font-mono mb-4 transition-opacity duration-300 ${isGpsActive ? 'text-emerald-700 opacity-100' : 'text-stone-300 opacity-0'}`}>
+                            <div className={`flex justify-between px-2 text-[10px] font-mono mb-4 transition-opacity ${isGpsActive ? 'text-emerald-700' : 'text-stone-300 opacity-0'}`}>
                                 <span>SOG: {velocity.speed.toFixed(1)} kts</span>
                                 <span className="flex items-center gap-1"><span className="animate-pulse text-emerald-500">●</span> Live GPS</span>
                                 <span>COG: {Math.round(velocity.course)}°</span>
                             </div>
 
                             <div className="flex gap-2">
-                                <button onClick={toggleGps} className={`flex-1 py-3 rounded-xl font-bold border transition-colors ${isGpsActive ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-stone-100 text-stone-700 border-stone-200 active:bg-stone-200'}`}>
+                                <button onClick={toggleGps} className={`flex-1 py-3 rounded-xl font-bold border transition-colors ${isGpsActive ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-stone-100 text-stone-700 border-stone-200'}`}>
                                     {isGpsActive ? t.btnGPS : t.btnGPSOff}
                                 </button>
-                                <button onClick={handleManualCalculate} disabled={isGpsActive} className="flex-[2] bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-md active:bg-emerald-800 transition-colors disabled:bg-stone-300 disabled:shadow-none">
+                                <button onClick={handleManualCalculate} disabled={isGpsActive} className="flex-[2] bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-md disabled:bg-stone-300">
                                     {isLoadingLocation && !isGpsActive ? <Loader2 className="animate-spin mx-auto"/> : t.btnCalc}
                                 </button>
                             </div>
@@ -391,9 +383,9 @@
                         
                         <section className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 text-center shadow-inner relative overflow-hidden">
                              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                                {nextEvent === 'Iftar' ? <Sun size={120} /> : <Moon size={120} />}
+                                {nextEvent === 'Maghrib' ? <Sun size={120} /> : <Moon size={120} />}
                             </div>
-                            <h2 className="text-xs font-bold text-emerald-800 uppercase tracking-widest mb-2 relative z-10">{nextEvent === 'Fajr' ? t.timeTillFajr : t.timeTillIftar}</h2>
+                            <h2 className="text-xs font-bold text-emerald-800 uppercase tracking-widest mb-2 relative z-10">{nextEvent === 'Fajr' ? t.timeTillFajr : t.timeTillMaghrib}</h2>
                             <p className="text-5xl font-light tabular-nums tracking-tighter text-stone-900 relative z-10">{countdown}</p>
                             {!solarDates && <p className="text-[10px] mt-2 text-stone-400">{t.waitingForLoc}</p>}
                         </section>
@@ -403,10 +395,7 @@
                                 <div className="grid grid-cols-6 gap-0.5 text-center">
                                     <div className="bg-emerald-50 py-2 rounded-l-lg border-r border-white">
                                         <p className="text-[7px] font-bold text-emerald-800 uppercase">{t.fajr}</p>
-                                        <p className="text-[11px] font-bold text-stone-800">
-                                            {solarTimes.fajr}
-                                            {fallbackApplied.fajr && <span className="text-amber-500 ml-0.5" title="90-min Fallback">*</span>}
-                                        </p>
+                                        <p className="text-[11px] font-bold text-stone-800">{solarTimes.fajr}{fallbackApplied.fajr && <span className="text-amber-500 ml-0.5">*</span>}</p>
                                     </div>
                                     <div className="bg-stone-50 py-2 border-r border-white">
                                         <p className="text-[7px] font-bold text-stone-400 uppercase">{t.sunrise}</p>
@@ -426,10 +415,7 @@
                                     </div>
                                     <div className="bg-stone-50 py-2 rounded-r-lg">
                                         <p className="text-[7px] font-bold text-stone-400 uppercase">{t.isha}</p>
-                                        <p className="text-[11px] font-medium text-stone-700">
-                                            {solarTimes.isha}
-                                            {fallbackApplied.isha && <span className="text-amber-500 ml-0.5" title="90-min Fallback">*</span>}
-                                        </p>
+                                        <p className="text-[11px] font-medium text-stone-700">{solarTimes.isha}{fallbackApplied.isha && <span className="text-amber-500 ml-0.5">*</span>}</p>
                                     </div>
                                 </div>
                                 <div className="mt-3 text-center space-y-1">
@@ -444,19 +430,19 @@
                                 <h2 className="font-medium flex items-center gap-2"><BookOpen size={18} className="text-emerald-700"/>{t.refTitle}</h2>
                                 <button onClick={()=>setJournalText(prev => prev + (prev ? '\n\n' : '') + humanistPrompts[lang][Math.floor(Math.random()*5)])} className="text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full text-[10px] flex items-center gap-1 border border-emerald-100 transition-all hover:bg-emerald-100"><Sparkles size={12}/> {t.btnPrompt}</button>
                             </div>
-                             <textarea value={journalText} onChange={e=>setJournalText(e.target.value)} className="w-full h-24 p-3 border border-stone-200 rounded-xl text-sm mb-2 focus:ring-1 focus:ring-emerald-500 outline-none shadow-inner" placeholder={t.refPlaceholder}></textarea>
+                             <textarea value={journalText} onChange={e=>setJournalText(e.target.value)} className="w-full h-24 p-3 border border-stone-200 rounded-xl text-sm mb-2 outline-none shadow-inner" placeholder={t.refPlaceholder}></textarea>
                              <button onClick={() => {
                                  if (!journalText.trim()) return;
                                  setEntries([{ id: Date.now(), text: journalText, date: new Date().toLocaleDateString(lang, { day: 'numeric', month: 'short' }), time: new Date().toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' }) }, ...entries]);
                                  setJournalText('');
-                             }} className="w-full bg-emerald-800 text-white py-2 rounded-lg text-sm shadow-sm font-medium hover:bg-emerald-900 transition-colors">Opslaan</button>
+                             }} className="w-full bg-emerald-800 text-white py-2 rounded-lg text-sm font-medium hover:bg-emerald-900">Opslaan</button>
                         </section>
 
                         <div className="space-y-3">
-                            {entries.map(e=>(<div key={e.id} className="bg-white p-4 rounded-xl border border-stone-200 relative shadow-sm group animate-in fade-in slide-in-from-bottom-2">
+                            {entries.map(e=>(<div key={e.id} className="bg-white p-4 rounded-xl border border-stone-200 relative shadow-sm group">
                                 <span className="text-[9px] text-emerald-700 font-bold uppercase tracking-wider">{e.date} • {e.time}</span>
                                 <p className="text-sm mt-1 leading-relaxed text-stone-700">{e.text}</p>
-                                <button onClick={()=>setEntries(entries.filter(i=>i.id!==e.id))} className="absolute top-4 right-4 text-stone-300 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={14}/></button>
+                                <button onClick={()=>setEntries(entries.filter(i=>i.id!==e.id))} className="absolute top-4 right-4 text-stone-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
                             </div>))}
                         </div>
                         <footer className="text-center py-4"><p className="text-[10px] text-stone-400 font-medium uppercase tracking-widest">{t.copyright}</p></footer>
@@ -468,7 +454,7 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => console.log('SW OK'), err => console.log('SW Error', err));
+                navigator.serviceWorker.register('sw.js');
             });
         }
     </script>
