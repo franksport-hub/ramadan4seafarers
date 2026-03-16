@@ -45,6 +45,7 @@
         const ChevronLeft = (p) => <Icon {...p}><path d="m15 18-6-6 6-6"/></Icon>;
         const XIcon = (p) => <Icon {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Icon>;
 
+        // --- Vertalingen ---
         const translations = {
             nl: {
                 title: "Islam at sea", subtitle: "Gebedstijden & Bezinning op volle zee.",
@@ -56,7 +57,12 @@
                 copyright: "© 2026 Islam at sea",
                 legendLive: "• Gecorrigeerd voor DR koers en vaart.", legendFallback: "* Aangepast via 90-minuten regel.",
                 qiblaTitle: "Qibla Kompas", qiblaInst: "Draai de roos om gelijk te stellen met het kompas van het schip.",
-                infoTitle: "Hoe worden de tijden berekend?", infoBaseTitle: "1. Astronomische Basis", infoBase: "Tijden gebaseerd op de zon t.o.v. horizon op jouw GPS-positie.", infoDRTitle: "2. Dead Reckoning", infoDR: "Als het schip vaart, wordt de aankomstpositie voor de zonsondergang en de volgende zonsopkomst berekend.", infoHighLatTitle: "3. Witte Nachten", infoHighLat: "Bij het ontbreken van astronomische schemering wordt de 90-minuten regel toegepast (*).", btnClose: "Begrepen"
+                infoTitle: "Hoe worden de tijden berekend?", infoBaseTitle: "1. Astronomische Basis", infoBase: "Tijden gebaseerd op de zon t.o.v. horizon op jouw GPS-positie.", infoDRTitle: "2. Dead Reckoning", infoDR: "Als het schip vaart, wordt de aankomstpositie voor de zonsondergang en de volgende zonsopkomst berekend.", infoHighLatTitle: "3. Witte Nachten", infoHighLat: "Bij het ontbreken van astronomische schemering wordt de 90-minuten regel toegepast (*).", btnClose: "Begrepen",
+                updTitle: "Nieuw in deze update",
+                updPoint1: "De tijd voor 'Zonsopkomst' is verwijderd om ruimte te maken voor de Fajr van morgen (berekend met DR).",
+                updPoint2: "Fajr tijden van vandaag worden nu grijs als ze al voorbij zijn.",
+                updPoint3: "Er is een nieuw interactief Qibla-kompas bovenaan het scherm. Je kunt de ring handmatig kalibreren met het scheepskompas.",
+                updBtn: "Doorgaan"
             },
             en: {
                 title: "Islam at sea", subtitle: "Prayer times & reflection at sea.",
@@ -68,13 +74,36 @@
                 copyright: "© 2026 Islam at sea",
                 legendLive: "• Corrected for DR course and speed.", legendFallback: "* Adjusted via 90-minute rule.",
                 qiblaTitle: "Qibla Compass", qiblaInst: "Rotate the dial to align with the ship's gyro or magnetic heading.",
-                infoTitle: "How are the times calculated?", infoBaseTitle: "1. Astronomical Base", infoBase: "Times based on the sun relative to horizon.", infoDRTitle: "2. Dead Reckoning", infoDR: "If the ship is moving, the arrival position for sunset and the next dawn is calculated.", infoHighLatTitle: "3. White Nights", infoHighLat: "When astronomical twilight is missing, the 90-minute rule applies (*).", btnClose: "Understood"
+                infoTitle: "How are the times calculated?", infoBaseTitle: "1. Astronomical Base", infoBase: "Times based on the sun relative to horizon.", infoDRTitle: "2. Dead Reckoning", infoDR: "If the ship is moving, the arrival position for sunset and the next dawn is calculated.", infoHighLatTitle: "3. White Nights", infoHighLat: "When astronomical twilight is missing, the 90-minute rule applies (*).", btnClose: "Understood",
+                updTitle: "What's new in this update?",
+                updPoint1: "The 'Sunrise' time has been removed to make room for tomorrow's Fajr (calculated with DR).",
+                updPoint2: "Today's Fajr times will now turn gray when they have passed.",
+                updPoint3: "There is a new interactive Qibla compass at the top. You can manually calibrate the dial to match the ship's heading.",
+                updBtn: "Continue"
+            },
+            id: {
+                title: "Islam at sea", subtitle: "Waktu salat & refleksi di laut.",
+                navTitle: "Posisi & Perhitungan", btnGPS: "Aktif", btnGPSOff: "GPS", btnCalc: "Hitung",
+                fajr: "Subuh", nextFajr: "Subuh Besok", dhuhr: "Dzuhur", asr: "Ashar", maghrib: "Maghrib", isha: "Isya",
+                timeTillFajr: "Waktu hingga Subuh", timeTillMaghrib: "Waktu hingga Maghrib",
+                waitingForLoc: "Masukkan lokasi atau aktifkan GPS...",
+                refTitle: "Catatan & Niat", refPlaceholder: "Tulis pikiran Anda...", btnPrompt: "Saran",
+                copyright: "© 2026 Islam at sea",
+                legendLive: "• Dikoreksi untuk arah & kecepatan.", legendFallback: "* Disesuaikan dengan aturan 90 menit.",
+                qiblaTitle: "Kompas Kiblat", qiblaInst: "Putar cincin untuk menyelaraskan dengan arah kapal.",
+                infoTitle: "Bagaimana waktu dihitung?", infoBaseTitle: "1. Basis Astronomi", infoBase: "Waktu berdasarkan posisi matahari.", infoDRTitle: "2. Dead Reckoning", infoDR: "Jika kapal bergerak, waktu dihitung berdasarkan prediksi posisi tiba.", infoHighLatTitle: "3. Malam Putih", infoHighLat: "Aturan 90 menit digunakan saat tidak ada senja astronomi (*).", btnClose: "Mengerti",
+                updTitle: "Apa yang baru di pembaruan ini?",
+                updPoint1: "Waktu 'Matahari terbit' dihapus untuk memberi ruang bagi Subuh besok (dihitung dengan DR).",
+                updPoint2: "Waktu Subuh hari ini akan menjadi abu-abu jika sudah lewat.",
+                updPoint3: "Ada kompas Kiblat interaktif baru di bagian atas. Anda dapat mengkalibrasi cincin secara manual agar sesuai dengan kompas kapal.",
+                updBtn: "Lanjutkan"
             }
         };
 
         const humanistPrompts = {
             nl: ["Waar ben ik vandaag dankbaar voor?", "Welke intentie zet ik vandaag?", "De zee is geduldig, hoe kan ik dat ook zijn?", "Wat wens ik de mensen thuis toe?", "Wat leer ik van de stilte?"],
-            en: ["What am I grateful for today?", "What intention am I setting?", "The sea is patient, how can I be too?", "What do I wish for loved ones?", "What does silence teach me?"]
+            en: ["What am I grateful for today?", "What intention am I setting?", "The sea is patient, how can I be too?", "What do I wish for loved ones?", "What does silence teach me?"],
+            id: ["Apa yang saya syukuri hari ini?", "Niat apa yang saya tetapkan hari ini?", "Laut itu sabar, bagaimana saya bisa begitu juga?", "Apa yang saya harapkan untuk orang terkasih?", "Apa yang keheningan ajarkan pada saya?"]
         };
 
         // --- COMPASS COMPONENT ---
@@ -88,7 +117,6 @@
 
             useEffect(() => {
                 if(lat && lng) {
-                    // Qibla berekening (Mekka: 21.422487° N, 39.826206° E)
                     const PI = Math.PI;
                     const latk = 21.422487 * PI / 180;
                     const lngk = 39.826206 * PI / 180;
@@ -129,10 +157,10 @@
                 e.target.releasePointerCapture(e.pointerId);
             };
 
-            const ticks = Array.from({ length: 72 }).map((_, i) => i * 5); // Elke 5 graden een streepje
+            const ticks = Array.from({ length: 72 }).map((_, i) => i * 5);
 
             return (
-                <div className="fixed inset-0 z-50 bg-stone-900 flex flex-col items-center justify-between p-6 animate-in fade-in">
+                <div className="fixed inset-0 z-[70] bg-stone-900 flex flex-col items-center justify-between p-6 animate-in fade-in">
                     <header className="w-full flex justify-between items-center text-white mt-4">
                         <button onClick={onClose} className="p-2 bg-white/10 rounded-full hover:bg-white/20"><ChevronLeft size={24}/></button>
                         <h2 className="font-bold text-lg">{t.qiblaTitle}</h2>
@@ -146,13 +174,11 @@
                         </p>
                         
                         <div className="relative w-80 h-80">
-                            {/* Pijl naar Qibla (Blijft vast op de berekende hoek staan + de rotatie van het kompas) */}
                             <div className="absolute inset-0 transition-transform duration-100 ease-out pointer-events-none z-10"
                                  style={{ transform: `rotate(${qibla + rotation}deg)` }}>
                                 <div className="absolute top-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[40px] border-b-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
                             </div>
 
-                            {/* Draaibare Kompasroos */}
                             <div 
                                 ref={compassRef}
                                 onPointerDown={handlePointerDown}
@@ -180,10 +206,18 @@
             );
         };
 
+        // --- HOOFD APPLICATIE ---
         function App() {
-            const getDeviceLang = () => (navigator.language || 'en').startsWith('nl') ? 'nl' : 'en';
+            const getDeviceLang = () => {
+                const l = navigator.language || 'en';
+                if (l.startsWith('nl')) return 'nl';
+                if (l.startsWith('id')) return 'id';
+                return 'en';
+            };
             const [lang, setLang] = useState(() => localStorage.getItem('appLang') || getDeviceLang());
             const t = translations[lang];
+
+            const [showUpdatePopup, setShowUpdatePopup] = useState(false);
             
             const [journalText, setJournalText] = useState('');
             const [entries, setEntries] = useState(() => JSON.parse(localStorage.getItem('ramadanEntries') || '[]'));
@@ -212,6 +246,18 @@
             
             const lastFetchRef = useRef(0);
             const watchIdRef = useRef(null);
+
+            useEffect(() => {
+                const hasSeenUpdate = localStorage.getItem('hasSeenUpdateV2');
+                if (!hasSeenUpdate) {
+                    setShowUpdatePopup(true);
+                }
+            }, []);
+
+            const closeUpdatePopup = () => {
+                localStorage.setItem('hasSeenUpdateV2', 'true');
+                setShowUpdatePopup(false);
+            };
 
             useEffect(() => { localStorage.setItem('appLang', lang); }, [lang]);
             useEffect(() => { localStorage.setItem('ramadanEntries', JSON.stringify(entries)); }, [entries]);
@@ -251,11 +297,9 @@
                 setIsLoadingLocation(true);
 
                 try {
-                    // VANDAAG
                     const resToday = await fetch(`https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`);
                     const dataToday = await resToday.json();
                     
-                    // MORGEN
                     const tomorrow = new Date();
                     tomorrow.setDate(tomorrow.getDate() + 1);
                     const tomorrowStr = tomorrow.toISOString().split('T')[0];
@@ -266,7 +310,6 @@
                         let resTodayFinal = dataToday.results;
                         let resTomFinal = dataTom.results;
 
-                        // DR Correctie Vandaag (Maghrib/Isha)
                         if (speedKts > 2) {
                             const currentIftar = new Date(resTodayFinal.sunset);
                             const timeToIftarHours = (currentIftar - new Date()) / 3600000;
@@ -279,7 +322,6 @@
                                 if (dataFut.status === 'OK') resTodayFinal = dataFut.results; 
                             }
 
-                            // DR Correctie Morgen (Next Fajr)
                             const baseTomFajr = new Date(resTomFinal.astronomical_twilight_begin);
                             const timeToTomFajrHours = (baseTomFajr - new Date()) / 3600000;
                             if (timeToTomFajrHours > 0 && timeToTomFajrHours < 24) {
@@ -292,14 +334,12 @@
                             }
                         }
 
-                        // Verwerk Tijden Vandaag
                         let dawn = new Date(resTodayFinal.astronomical_twilight_begin);
                         let rise = new Date(resTodayFinal.sunrise);
                         let dhuhr = new Date(resTodayFinal.solar_noon);
                         let sunset = new Date(resTodayFinal.sunset);
                         let isha = new Date(resTodayFinal.astronomical_twilight_end);
                         
-                        // Verwerk Tijd Morgen
                         let nextDawn = new Date(resTomFinal.astronomical_twilight_begin);
                         let nextRise = new Date(resTomFinal.sunrise);
 
@@ -411,12 +451,35 @@
 
             return (
                 <div className="min-h-screen bg-stone-100 text-stone-800 font-sans pb-10">
+                    
+                    {/* Update Popup */}
+                    {showUpdatePopup && (
+                        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-stone-900/70 backdrop-blur-sm animate-in fade-in">
+                            <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden border-2 border-emerald-500">
+                                <div className="bg-emerald-100 p-5 text-center">
+                                    <Sparkles size={32} className="mx-auto text-emerald-600 mb-2" />
+                                    <h3 className="font-bold text-lg text-emerald-900">{t.updTitle}</h3>
+                                </div>
+                                <div className="p-5 space-y-4 text-sm text-stone-700">
+                                    <ul className="space-y-3 list-disc pl-4 marker:text-emerald-500">
+                                        <li>{t.updPoint1}</li>
+                                        <li>{t.updPoint2}</li>
+                                        <li>{t.updPoint3}</li>
+                                    </ul>
+                                    <button onClick={closeUpdatePopup} className="w-full mt-6 bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800 transition shadow-md">
+                                        {t.updBtn}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {showCompass && getCurrentDecimalLat() && getCurrentDecimalLng() && (
                         <QiblaCompass lat={getCurrentDecimalLat()} lng={getCurrentDecimalLng()} onClose={() => setShowCompass(false)} t={t} />
                     )}
 
                     {showInfo && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-in fade-in">
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-in fade-in">
                             <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
                                 <div className="bg-emerald-900 p-4 flex justify-between items-center text-white">
                                     <h3 className="font-bold flex items-center gap-2"><InfoCircle size={18} /> {t.infoTitle}</h3>
@@ -436,10 +499,15 @@
                         <div className="absolute top-6 right-6 flex gap-2">
                             <button onClick={() => setShowCompass(true)} className="bg-emerald-500/20 text-emerald-300 p-2 rounded-full border border-emerald-400/30 transition-all active:scale-95"><CompassIcon size={18} /></button>
                             <button onClick={() => setShowInfo(true)} className="bg-white/10 p-2 rounded-full border border-white/20 transition-all active:scale-95"><InfoCircle size={18} /></button>
-                            <button onClick={() => setLang(lang === 'nl' ? 'en' : 'nl')} className="bg-white/10 p-2 rounded-full border border-white/20 transition-all active:scale-95"><Globe size={18} /></button>
+                            <button onClick={() => {
+                                const langs = ['en', 'nl', 'id'];
+                                setLang(langs[(langs.indexOf(lang) + 1) % langs.length]);
+                            }} className="bg-white/10 p-2 rounded-full border border-white/20 transition-all active:scale-95 flex items-center justify-center font-bold text-xs w-9 h-9 uppercase">
+                                {lang}
+                            </button>
                         </div>
                         
-                        <div className="max-w-md mx-auto pr-24">
+                        <div className="max-w-md mx-auto pr-32">
                             <h1 className="text-2xl font-bold flex items-center gap-2 tracking-tight"><Anchor size={24} className="text-emerald-400" /> {t.title}</h1>
                             <p className="text-stone-300 text-xs mt-1 font-light">{t.subtitle}</p>
                         </div>
@@ -492,7 +560,6 @@
                         {solarTimes && (
                             <section className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
                                 <div className="grid grid-cols-6 gap-0.5 text-center">
-                                    {/* Huidige Fajr (Wordt grijs als hij voorbij is) */}
                                     <div className={`py-2 rounded-l-lg border-r border-white transition-colors ${isFajrPassed ? 'bg-stone-100' : 'bg-emerald-50'}`}>
                                         <p className={`text-[7px] font-bold uppercase ${isFajrPassed ? 'text-stone-400' : 'text-emerald-800'}`}>{t.fajr}</p>
                                         <p className={`text-[11px] font-bold ${isFajrPassed ? 'text-stone-400 opacity-60' : 'text-stone-800'}`}>{solarTimes.fajr}{fallbackApplied.fajr && <span className="text-amber-500 ml-0.5">*</span>}</p>
@@ -513,7 +580,6 @@
                                         <p className="text-[7px] font-bold text-stone-400 uppercase">{t.isha}</p>
                                         <p className="text-[11px] font-medium text-stone-700">{solarTimes.isha}{fallbackApplied.isha && <span className="text-amber-500 ml-0.5">*</span>}</p>
                                     </div>
-                                    {/* Fajr Morgen (met DR) */}
                                     <div className="bg-emerald-100/50 py-2 rounded-r-lg">
                                         <p className="text-[7px] font-bold text-emerald-800 uppercase">{t.nextFajr}</p>
                                         <p className="text-[11px] font-bold text-stone-800">{solarTimes.nextFajr}{fallbackApplied.nextFajr && <span className="text-amber-500 ml-0.5">*</span>}</p>
