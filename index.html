@@ -7,9 +7,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#064e3b">
     <title>Islam at sea</title>
+
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -21,33 +24,106 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        const I = (p) => <svg xmlns="http://www.w3.org/2000/svg" width={p.size||24} height={p.size||24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={p.className} {...p}>{p.children}</svg>;
-        const Sun = (p) => <I {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></I>;
-        const Moon = (p) => <I {...p}><path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"/></I>;
-        const BookOpen = (p) => <I {...p}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></I>;
-        const Navigation = (p) => <I {...p}><polygon points="3 11 22 2 13 21 11 13 3 11"/></I>;
-        const CompassIcon = (p) => <I {...p}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></I>;
-        const Anchor = (p) => <I {...p}><circle cx="12" cy="5" r="3"/><line x1="12" x2="12" y1="8" y2="22"/><line x1="5" x2="19" y1="12" y2="12"/><path d="M5 12c0 3.866 3.134 7 7 7s7-3.134 7-7"/></I>;
-        const Loader2 = (p) => <I {...p}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></I>;
-        const Trash2 = (p) => <I {...p}><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m1-2c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-2 5v6m4-6v6"/></I>;
-        const Sparkles = (p) => <I {...p}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></I>;
-        const InfoCircle = (p) => <I {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></I>;
-        const ChevronLeft = (p) => <I {...p}><path d="m15 18-6-6 6-6"/></I>;
-        const XIcon = (p) => <I {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></I>;
-        const CalendarIcon = (p) => <I {...p}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></I>;
-        const HeartIcon = (p) => <I {...p}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></I>;
+        // --- Iconen ---
+        const Icon = ({ children, size = 24, className = "", ...rest }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...rest}>{children}</svg>
+        );
+        const Sun = (p) => <Icon {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></Icon>;
+        const Moon = (p) => <Icon {...p}><path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"/></Icon>;
+        const BookOpen = (p) => <Icon {...p}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
+        const Navigation = (p) => <Icon {...p}><polygon points="3 11 22 2 13 21 11 13 3 11"/></Icon>;
+        const CompassIcon = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></Icon>;
+        const Anchor = (p) => <Icon {...p}><circle cx="12" cy="5" r="3"/><line x1="12" x2="12" y1="8" y2="22"/><line x1="5" x2="19" y1="12" y2="12"/><path d="M5 12c0 3.866 3.134 7 7 7s7-3.134 7-7"/></Icon>;
+        const Trash2 = (p) => <Icon {...p}><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m1-2c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-2 5v6m4-6v6"/></Icon>;
+        const Sparkles = (p) => <Icon {...p}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></Icon>;
+        const InfoCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></Icon>;
+        const ChevronLeft = (p) => <Icon {...p}><path d="m15 18-6-6 6-6"/></Icon>;
+        const XIcon = (p) => <Icon {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Icon>;
+        const CalendarIcon = (p) => <Icon {...p}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></Icon>;
+        const HeartIcon = (p) => <Icon {...p}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></Icon>;
 
+        // --- Islamic Events 2026 ---
         const islamicEvents = [
-            { name: "Eid al-Fitr", date: new Date(2026, 2, 20) }, { name: "Eid al-Adha", date: new Date(2026, 4, 27) },
-            { name: "Islamic New Year", date: new Date(2026, 6, 16) }, { name: "Ashura", date: new Date(2026, 6, 25) },
+            { name: "Eid al-Fitr", date: new Date(2026, 2, 20) },
+            { name: "Eid al-Adha", date: new Date(2026, 4, 27) },
+            { name: "Islamic New Year", date: new Date(2026, 6, 16) },
+            { name: "Ashura", date: new Date(2026, 6, 25) },
             { name: "Mawlid an-Nabi", date: new Date(2026, 8, 25) }
         ];
 
         const translations = {
-            nl: { title: "Islam at sea", subtitle: "Gebedstijden & Bezinning op volle zee.", navTitle: "Positie & Berekening", btnGPS: "Actief", btnGPSOff: "GPS", btnCalc: "Bereken", fajr: "Fajr", nextFajr: "Fajr Morgen", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha", timeTill: "Tijd tot", daysUntil: "Nog", days: "dagen tot", todayIs: "Vandaag is", waitingForLoc: "Geef een locatie op of activeer GPS...", refTitle: "Notities & Intenties", refPlaceholder: "Schrijf hier je gedachten...", btnPrompt: "Suggestie", copyright: "© 2026 Islam at sea", legendLive: "• Gecorrigeerd voor DR koers en vaart.", legendFallback: "* Aangepast via 90-minuten regel.", qiblaTitle: "Qibla Kompas", qiblaInst: "Draai de roos om gelijk te stellen met het kompas van het schip.", infoTitle: "Hoe worden de tijden berekend?", infoBaseTitle: "1. Astronomische Basis", infoBase: "Tijden gebaseerd op de zon t.o.v. horizon op jouw GPS-positie.", infoDRTitle: "2. Dead Reckoning", infoDR: "Als het schip vaart, wordt de aankomstpositie berekend.", infoHighLatTitle: "3. Witte Nachten", infoHighLat: "Bij het ontbreken van astronomische schemering wordt de 90-minuten regel toegepast (*).", btnClose: "Begrepen", support: "Steun de ontwikkelaar via PayPal" },
-            en: { title: "Islam at sea", subtitle: "Prayer times & reflection at sea.", navTitle: "Position & Calculation", btnGPS: "Active", btnGPSOff: "GPS", btnCalc: "Calc", fajr: "Fajr", nextFajr: "Next Fajr", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha", timeTill: "Time till", daysUntil: "", days: "days until", todayIs: "Today is", waitingForLoc: "Enter a location or activate GPS...", refTitle: "Notes & Intentions", refPlaceholder: "Write your thoughts...", btnPrompt: "Suggestion", copyright: "© 2026 Islam at sea", legendLive: "• Corrected for DR course and speed.", legendFallback: "* Adjusted via 90-minute rule.", qiblaTitle: "Qibla Compass", qiblaInst: "Rotate the dial to align with the ship's heading.", infoTitle: "How are the times calculated?", infoBaseTitle: "1. Astronomical Base", infoBase: "Times based on the sun relative to horizon.", infoDRTitle: "2. Dead Reckoning", infoDR: "If moving, arrival position is calculated.", infoHighLatTitle: "3. White Nights", infoHighLat: "When astronomical twilight is missing, the 90-minute rule applies (*).", btnClose: "Understood", support: "Support the developer via PayPal" },
-            ar: { title: "الإسلام في البحر", subtitle: "أوقات الصلاة والتأمل في عرض البحر.", navTitle: "الموقع والحساب", btnGPS: "نشط", btnGPSOff: "GPS", btnCalc: "احسب", fajr: "الفجر", nextFajr: "الفجر غداً", dhuhr: "الظهر", asr: "العصر", maghrib: "المغرب", isha: "العشاء", timeTill: "الوقت حتى", daysUntil: "باقي", days: "أيام على", todayIs: "اليوم هو", waitingForLoc: "أدخل موقعاً أو قم بتفعيل GPS...", refTitle: "ملاحظات ونوايا", refPlaceholder: "اكتب أفكارك هنا...", btnPrompt: "اقتراح", copyright: "© 2026 Islam at sea", legendLive: "• مصحح لسرعة ومسار السفينة.", legendFallback: "* تم التعديل بقاعدة الـ 90 دقيقة.", qiblaTitle: "بوصلة القبلة", qiblaInst: "قم بتدوير القرص ليتماشى مع بوصلة السفينة.", infoTitle: "كيف يتم حساب الأوقات؟", infoBaseTitle: "1. الأساس الفلكي", infoBase: "تعتمد على زاوية الشمس.", infoDRTitle: "2. الحساب الملاحي", infoDR: "يتم حساب الموقع المتوقع إذا كانت السفينة تتحرك.", infoHighLatTitle: "3. الليالي البيضاء", infoHighLat: "تُطبق قاعدة الـ 90 دقيقة عند غياب الشفق (*).", btnClose: "مفهوم", support: "ادعم المطور عبر PayPal" },
-            id: { title: "Islam at sea", subtitle: "Waktu salat & refleksi di laut.", navTitle: "Posisi & Perhitungan", btnGPS: "Aktif", btnGPSOff: "GPS", btnCalc: "Hitung", fajr: "Subuh", nextFajr: "Subuh Besok", dhuhr: "Dzuhur", asr: "Ashar", maghrib: "Maghrib", isha: "Isya", timeTill: "Waktu hingga", daysUntil: "Sisa", days: "hari menuju", todayIs: "Hari ini adalah", waitingForLoc: "Masukkan lokasi atau aktifkan GPS...", refTitle: "Catatan & Niat", refPlaceholder: "Tulis pikiran Anda...", btnPrompt: "Saran", copyright: "© 2026 Islam at sea", legendLive: "• Dikoreksi untuk arah & kecepatan.", legendFallback: "* Disesuaikan dengan aturan 90 menit.", qiblaTitle: "Kompas Kiblat", qiblaInst: "Putar cincin untuk menyelaraskan dengan arah kapal.", infoTitle: "Bagaimana waktu dihitung?", infoBaseTitle: "1. Basis Astronomi", infoBase: "Waktu berdasarkan posisi matahari.", infoDRTitle: "2. Dead Reckoning", infoDR: "Jika kapal bergerak, waktu dihitung berdasarkan prediksi posisi tiba.", infoHighLatTitle: "3. Malam Putih", infoHighLat: "Aturan 90 menit digunakan saat tidak ada senja astronomi (*).", btnClose: "Mengerti", support: "Dukung pengembang via PayPal" }
+            nl: {
+                title: "Islam at sea", subtitle: "Gebedstijden & Bezinning op volle zee.",
+                navTitle: "Positie & Berekening", btnGPS: "Actief", btnGPSOff: "GPS", btnCalc: "Bereken",
+                fajr: "Fajr", nextFajr: "Fajr Morgen", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha",
+                timeTill: "Tijd tot", daysUntil: "Nog", days: "dagen tot", todayIs: "Vandaag is",
+                waitingForLoc: "Geef een locatie op of activeer GPS...",
+                refTitle: "Notities & Intenties", refPlaceholder: "Schrijf hier je gedachten...", btnPrompt: "Suggestie",
+                copyright: "© 2026 Islam at sea", legendLive: "• Gecorrigeerd voor DR koers en vaart.", legendFallback: "* Aangepast via 90-minuten regel.",
+                qiblaTitle: "Qibla Kompas", qiblaInst: "Draai de roos om gelijk te stellen met het kompas van het schip.",
+                infoTitle: "Hoe worden de tijden berekend?", infoBaseTitle: "1. Volledig Offline Motor", infoBase: "De app berekent tijden nu met pure wiskunde op je toestel. Geen internet of API meer nodig!", infoDRTitle: "2. Dead Reckoning", infoDR: "Als het schip vaart, wordt de aankomstpositie voor de zonsondergang berekend.", infoHighLatTitle: "3. Witte Nachten", infoHighLat: "Bij het ontbreken van astronomische schemering (-18°) wordt de 90-minuten regel toegepast (*).", btnClose: "Begrepen",
+                updTitle: "Nieuw in deze Versie",
+                updPoint1: "De klok telt nu slim af naar het volgende gebed in de cyclus.",
+                updPoint2: "Nieuwe event-tracker! Zie precies hoeveel dagen het nog is tot feestdagen.",
+                updPoint3: "De taalknop wisselt nu tussen Engels, Arabisch en je toesteltaal.",
+                updPoint4: "100% Offline: We hebben de afhankelijkheid van externe internetservers verwijderd. Berekeningen zijn nu sneller en betrouwbaarder op zee.",
+                updPoint5: "Waardeer je de app op je wachten? Je kunt de ontwikkelaar nu subtiel steunen via de Info-knop. 😉",
+                updBtn: "Doorgaan", support: "Steun de ontwikkelaar"
+            },
+            en: {
+                title: "Islam at sea", subtitle: "Prayer times & reflection at sea.",
+                navTitle: "Position & Calculation", btnGPS: "Active", btnGPSOff: "GPS", btnCalc: "Calc",
+                fajr: "Fajr", nextFajr: "Next Fajr", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha",
+                timeTill: "Time till", daysUntil: "", days: "days until", todayIs: "Today is",
+                waitingForLoc: "Enter a location or activate GPS...",
+                refTitle: "Notes & Intentions", refPlaceholder: "Write your thoughts...", btnPrompt: "Suggestion",
+                copyright: "© 2026 Islam at sea", legendLive: "• Corrected for DR course and speed.", legendFallback: "* Adjusted via 90-minute rule.",
+                qiblaTitle: "Qibla Compass", qiblaInst: "Rotate the dial to align with the ship's heading.",
+                infoTitle: "How are the times calculated?", infoBaseTitle: "1. Fully Offline Engine", infoBase: "Times are now calculated mathematically on your device. No API or internet required!", infoDRTitle: "2. Dead Reckoning", infoDR: "If moving, arrival position is calculated.", infoHighLatTitle: "3. White Nights", infoHighLat: "When astronomical twilight is missing, the 90-minute rule applies (*).", btnClose: "Understood",
+                updTitle: "New in this Version",
+                updPoint1: "The countdown now intelligently tracks the next upcoming prayer.",
+                updPoint2: "New event tracker! See how many days are left until holidays.",
+                updPoint3: "Language button toggles English, Arabic, and device language.",
+                updPoint4: "100% Offline: Removed dependence on internet servers. Calculations are now instant and robust at sea.",
+                updPoint5: "Like the app on your watches? You can now quietly support the developer via the Info button. 😉",
+                updBtn: "Continue", support: "Support the developer"
+            },
+            ar: {
+                title: "الإسلام في البحر", subtitle: "أوقات الصلاة والتأمل في عرض البحر.",
+                navTitle: "الموقع والحساب", btnGPS: "نشط", btnGPSOff: "GPS", btnCalc: "احسب",
+                fajr: "الفجر", nextFajr: "الفجر غداً", dhuhr: "الظهر", asr: "العصر", maghrib: "المغرب", isha: "العشاء",
+                timeTill: "الوقت حتى", daysUntil: "باقي", days: "أيام على", todayIs: "اليوم هو",
+                waitingForLoc: "أدخل موقعاً أو قم بتفعيل GPS...",
+                refTitle: "ملاحظات ونوايا", refPlaceholder: "اكتب أفكارك هنا...", btnPrompt: "اقتراح",
+                copyright: "© 2026 Islam at sea", legendLive: "• مصحح لسرعة ومسار السفينة.", legendFallback: "* تم التعديل بقاعدة الـ 90 دقيقة.",
+                qiblaTitle: "بوصلة القبلة", qiblaInst: "قم بتدوير القرص ليتماشى مع بوصلة السفينة.",
+                infoTitle: "كيف يتم حساب الأوقات؟", infoBaseTitle: "1. محرك غير متصل تماماً", infoBase: "يتم حساب الأوقات رياضياً على جهازك. لا حاجة للإنترنت!", infoDRTitle: "2. الحساب الملاحي", infoDR: "يتم حساب الموقع المتوقع إذا كانت السفينة تتحرك.", infoHighLatTitle: "3. الليالي البيضاء", infoHighLat: "تُطبق قاعدة الـ 90 دقيقة عند غياب الشفق (*).", btnClose: "مفهوم",
+                updTitle: "الجديد في هذا الإصدار",
+                updPoint1: "العد التنازلي الآن يتتبع الصلاة القادمة بذكاء.",
+                updPoint2: "متتبع أحداث جديد! اعرف الأيام المتبقية حتى الأعياد.",
+                updPoint3: "زر اللغة يدعم الآن الإنجليزية، العربية، ولغة جهازك.",
+                updPoint4: "100% بدون إنترنت: إزالة الاعتماد على الخوادم الخارجية لحسابات أسرع في البحر.",
+                updPoint5: "هل يعجبك التطبيق؟ يمكنك الآن دعم المطور بهدوء عبر زر المعلومات. 😉",
+                updBtn: "متابعة", support: "ادعم المطور"
+            },
+            id: {
+                title: "Islam at sea", subtitle: "Waktu salat & refleksi di laut.",
+                navTitle: "Posisi & Perhitungan", btnGPS: "Aktif", btnGPSOff: "GPS", btnCalc: "Hitung",
+                fajr: "Subuh", nextFajr: "Subuh Besok", dhuhr: "Dzuhur", asr: "Ashar", maghrib: "Maghrib", isha: "Isya",
+                timeTill: "Waktu hingga", daysUntil: "Sisa", days: "hari menuju", todayIs: "Hari ini adalah",
+                waitingForLoc: "Masukkan lokasi atau aktifkan GPS...",
+                refTitle: "Catatan & Niat", refPlaceholder: "Tulis pikiran Anda...", btnPrompt: "Saran",
+                copyright: "© 2026 Islam at sea", legendLive: "• Dikoreksi untuk arah & kecepatan.", legendFallback: "* Disesuaikan dengan aturan 90 menit.",
+                qiblaTitle: "Kompas Kiblat", qiblaInst: "Putar cincin untuk menyelaraskan dengan arah kapal.",
+                infoTitle: "Bagaimana waktu dihitung?", infoBaseTitle: "1. Mesin Offline Penuh", infoBase: "Waktu dihitung secara matematis di perangkat Anda. Tidak butuh internet!", infoDRTitle: "2. Dead Reckoning", infoDR: "Jika kapal bergerak, waktu dihitung berdasarkan prediksi posisi tiba.", infoHighLatTitle: "3. Malam Putih", infoHighLat: "Aturan 90 menit digunakan saat tidak ada senja astronomi (*).", btnClose: "Mengerti",
+                updTitle: "Apa yang baru di Versi ini",
+                updPoint1: "Hitung mundur sekarang melacak waktu salat berikutnya.",
+                updPoint2: "Pelacak acara baru! Lihat sisa hari hingga hari libur.",
+                updPoint3: "Tombol bahasa mendukung Inggris, Arab, dan bahasa perangkat.",
+                updPoint4: "100% Offline: Dihapusnya ketergantungan server API. Perhitungan kini instan di laut.",
+                updPoint5: "Suka aplikasinya? Anda sekarang dapat mendukung pengembang melalui tombol Info. 😉",
+                updBtn: "Lanjutkan", support: "Dukung pengembang"
+            }
         };
 
         const humanistPrompts = {
@@ -118,16 +194,19 @@
             const t = translations[lang];
             const isRTL = lang === 'ar';
 
+            const [showUpdatePopup, setShowUpdatePopup] = useState(false);
             const [journalText, setJournalText] = useState('');
             const [entries, setEntries] = useState(() => JSON.parse(localStorage.getItem('ramadanEntries') || '[]'));
+            
             const [solarDates, setSolarDates] = useState(null);
             const [solarTimes, setSolarTimes] = useState(null);
             const [countdown, setCountdown] = useState('--:--:--');
             const [nextEvent, setNextEvent] = useState('');
             const [upcomingFestival, setUpcomingFestival] = useState('');
+            
             const [showInfo, setShowInfo] = useState(false);
             const [showCompass, setShowCompass] = useState(false);
-            const [fallbackApplied, setFallbackApplied] = useState({ fajr: false, isha: false });
+            const [fallbackApplied, setFallbackApplied] = useState({ fajr: false, isha: false, nextFajr: false });
             
             const [latDeg, setLatDeg] = useState(() => localStorage.getItem('latDeg') || '');
             const [latMin, setLatMin] = useState(() => localStorage.getItem('latMin') || '');
@@ -138,9 +217,13 @@
             
             const [isGpsActive, setIsGpsActive] = useState(false);
             const [velocity, setVelocity] = useState({ speed: 0, course: 0 });
-            const [isLoadingLocation, setIsLoadingLocation] = useState(false);
             
             const watchIdRef = useRef(null);
+
+            useEffect(() => {
+                const hasSeenUpdate = localStorage.getItem('hasSeenUpdateV5_Offline');
+                if (!hasSeenUpdate) setShowUpdatePopup(true);
+            }, []);
 
             useEffect(() => {
                 const now = new Date();
@@ -163,7 +246,7 @@
                 localStorage.setItem('lngDeg', lngDeg); localStorage.setItem('lngMin', lngMin); localStorage.setItem('lngDir', lngDir);
             }, [latDeg, latMin, latDir, lngDeg, lngMin, lngDir]);
 
-            // Geoptimaliseerde countdown
+            // --- De Timer Logica ---
             useEffect(() => {
                 let interval;
                 if (solarDates) {
@@ -174,10 +257,10 @@
                             { name: t.asr, date: solarDates.asr }, { name: t.maghrib, date: solarDates.maghrib },
                             { name: t.isha, date: solarDates.isha }, { name: t.nextFajr, date: solarDates.nextFajr }
                         ];
-                        const future = prayers.filter(p => p.date > now).sort((a, b) => a.date - b.date);
+                        const future = prayers.filter(p => p.date && p.date > now).sort((a, b) => a.date - b.date);
                         const nextPrayer = future.length > 0 ? future[0] : prayers[prayers.length - 1];
                         
-                        if (nextPrayer) {
+                        if (nextPrayer && nextPrayer.date) {
                             const diff = nextPrayer.date - now;
                             if(diff > 0) {
                                 const h = Math.floor(diff / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
@@ -191,68 +274,86 @@
                 return () => clearInterval(interval);
             }, [solarDates, t]);
 
-            const fetchSolarTimes = async (lat, lng, speed = 0, crs = 0) => {
-                setIsLoadingLocation(true);
+            // --- DE NIEUWE VOLLEDIG OFFLINE REKENMOTOR (SunCalc) ---
+            const calculateSolarTimes = (latitude, longitude, speedKts = 0, course = 0) => {
                 try {
-                    const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&formatted=0`);
-                    const data = await res.json();
-                    
-                    if (data.status === 'OK') {
-                        let r = data.results;
-                        if (speed > 2) {
-                            const tSunset = (new Date(r.sunset) - new Date()) / 3600000;
-                            if (tSunset > 0 && tSunset < 12) {
-                                const dLat = (speed * tSunset * Math.cos(crs * Math.PI / 180)) / 60;
-                                const dLng = (speed * tSunset * Math.sin(crs * Math.PI / 180)) / (60 * Math.cos(lat * Math.PI / 180));
-                                const rFut = await fetch(`https://api.sunrise-sunset.org/json?lat=${lat + dLat}&lng=${lng + dLng}&formatted=0`);
-                                const dFut = await rFut.json();
-                                if (dFut.status === 'OK') r = dFut.results; 
+                    const now = new Date();
+                    const tomorrow = new Date(now.getTime() + 86400000);
+
+                    // Haal basis zondata lokaal op (gebruikt de -18 graden limieten van SunCalc)
+                    let timesToday = SunCalc.getTimes(now, latitude, longitude);
+                    let timesTom = SunCalc.getTimes(tomorrow, latitude, longitude);
+
+                    let dawn = timesToday.nightEnd; // Dit is exact -18 graden (Fajr)
+                    let rise = timesToday.sunrise;
+                    let dhuhr = timesToday.solarNoon;
+                    let sunset = timesToday.sunset;
+                    let isha = timesToday.night; // Dit is exact -18 graden (Isha)
+                    let nextDawn = timesTom.nightEnd;
+                    let nextRise = timesTom.sunrise;
+
+                    // DR Correctie (Dead Reckoning)
+                    if (speedKts > 2) {
+                        if (sunset && !isNaN(sunset.getTime())) {
+                            const timeToSunset = (sunset - new Date()) / 3600000;
+                            if (timeToSunset > 0 && timeToSunset < 12) {
+                                const dist = speedKts * timeToSunset;
+                                const dLat = (dist * Math.cos(course * Math.PI / 180)) / 60;
+                                const dLng = (dist * Math.sin(course * Math.PI / 180)) / (60 * Math.cos(latitude * Math.PI / 180));
+                                timesToday = SunCalc.getTimes(now, latitude + dLat, longitude + dLng);
+                                sunset = timesToday.sunset;
+                                dhuhr = timesToday.solarNoon;
                             }
                         }
-
-                        let dhuhr = new Date(r.solar_noon);
-                        let sunset = new Date(r.sunset);
-                        let rise = new Date(r.sunrise);
-                        let dawn = new Date(r.astronomical_twilight_begin);
-                        let isha = new Date(r.astronomical_twilight_end);
-                        
-                        const isInv = (d) => isNaN(d.getTime()) || d.getFullYear() === 1970;
-                        let fbFajr = false; let fbIsha = false;
-
-                        if (isInv(rise) || isInv(sunset)) {
-                            rise = new Date(dhuhr.getTime() - 6 * 3600000); sunset = new Date(dhuhr.getTime() + 6 * 3600000);
-                            fbFajr = true; fbIsha = true; 
+                        if (nextDawn && !isNaN(nextDawn.getTime())) {
+                            const timeToTomFajr = (nextDawn - new Date()) / 3600000;
+                            if (timeToTomFajr > 0 && timeToTomFajr < 24) {
+                                const dist = speedKts * timeToTomFajr;
+                                const dLat = (dist * Math.cos(course * Math.PI / 180)) / 60;
+                                const dLng = (dist * Math.sin(course * Math.PI / 180)) / (60 * Math.cos(latitude * Math.PI / 180));
+                                timesTom = SunCalc.getTimes(tomorrow, latitude + dLat, longitude + dLng);
+                                nextDawn = timesTom.nightEnd;
+                                nextRise = timesTom.sunrise;
+                            }
                         }
-                        if (isInv(dawn) || dawn > rise) { dawn = new Date(rise.getTime() - 90 * 60000); fbFajr = true; }
-                        if (isInv(isha) || isha < sunset) { isha = new Date(sunset.getTime() + 90 * 60000); fbIsha = true; }
-                        
-                        // FIX: Asr berekend ná de fallback van Dhuhr en Sunset
-                        let asr = new Date(dhuhr.getTime() + (sunset.getTime() - dhuhr.getTime()) * 0.55);
-                        let nextDawn = new Date(dawn.getTime() + 86400000);
-
-                        setFallbackApplied({ fajr: fbFajr, isha: fbIsha });
-                        setSolarDates({ fajr: dawn, dhuhr, asr, maghrib: sunset, isha, nextFajr: nextDawn });
-
-                        const o = { hour: '2-digit', minute: '2-digit' };
-                        setSolarTimes({
-                            fajr: dawn.toLocaleTimeString([], o), dhuhr: dhuhr.toLocaleTimeString([], o), asr: asr.toLocaleTimeString([], o),
-                            maghrib: sunset.toLocaleTimeString([], o), isha: isha.toLocaleTimeString([], o), nextFajr: nextDawn.toLocaleTimeString([], o)
-                        });
-                    } else {
-                        alert("API fout: " + data.status + ". Probeer het later opnieuw.");
                     }
+
+                    // Fallback Logica voor Hoge Breedtegraden (Witte Nachten)
+                    const isInv = (d) => !d || isNaN(d.getTime()) || d.getFullYear() === 1970;
+                    let fbFajr = false; let fbIsha = false; let fbNextFajr = false;
+
+                    if (isInv(rise) || isInv(sunset)) {
+                        if (isInv(dhuhr)) dhuhr = new Date(now.setHours(12, 0, 0, 0));
+                        rise = new Date(dhuhr.getTime() - 6 * 3600000);
+                        sunset = new Date(dhuhr.getTime() + 6 * 3600000);
+                        fbFajr = true; fbIsha = true; fbNextFajr = true;
+                    }
+                    if (isInv(dawn) || dawn > rise) { dawn = new Date(rise.getTime() - 90 * 60000); fbFajr = true; }
+                    if (isInv(isha) || isha < sunset) { isha = new Date(sunset.getTime() + 90 * 60000); fbIsha = true; }
+                    if (isInv(nextDawn) || nextDawn > nextRise) { nextDawn = new Date(nextRise.getTime() - 90 * 60000); fbNextFajr = true; }
+
+                    setFallbackApplied({ fajr: fbFajr, isha: fbIsha, nextFajr: fbNextFajr });
+
+                    // Bereken Asr
+                    let asr = new Date(dhuhr.getTime() + (sunset.getTime() - dhuhr.getTime()) * 0.55);
+
+                    setSolarDates({ fajr: dawn, dhuhr, asr, maghrib: sunset, isha, nextFajr: nextDawn });
+
+                    const o = { hour: '2-digit', minute: '2-digit' };
+                    setSolarTimes({
+                        fajr: dawn.toLocaleTimeString([], o), dhuhr: dhuhr.toLocaleTimeString([], o), asr: asr.toLocaleTimeString([], o),
+                        maghrib: sunset.toLocaleTimeString([], o), isha: isha.toLocaleTimeString([], o), nextFajr: nextDawn.toLocaleTimeString([], o)
+                    });
                 } catch (e) {
-                    alert("Kan tijden niet ophalen. Controleer internetverbinding.");
-                    console.error(e);
+                    console.error("Berekeningsfout:", e);
                 }
-                setIsLoadingLocation(false);
             };
 
             const doCalc = () => {
                 if (latDeg !== '' && lngDeg !== '') {
                     let lat = parseFloat(latDeg) + (parseFloat(latMin || 0) / 60); lat = latDir === 'S' ? -lat : lat;
                     let lng = parseFloat(lngDeg) + (parseFloat(lngMin || 0) / 60); lng = lngDir === 'W' ? -lng : lng;
-                    fetchSolarTimes(lat, lng, 0, 0);
+                    calculateSolarTimes(lat, lng, 0, 0);
                 } else { alert("Vul LAT en LNG in"); }
             };
 
@@ -261,15 +362,15 @@
                     if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
                     setIsGpsActive(false); setVelocity({ speed: 0, course: 0 });
                 } else if (navigator.geolocation) {
-                    setIsGpsActive(true); setIsLoadingLocation(true);
+                    setIsGpsActive(true); 
                     watchIdRef.current = navigator.geolocation.watchPosition((p) => {
                         const la = p.coords.latitude; const lo = p.coords.longitude;
                         const sog = p.coords.speed ? p.coords.speed * 1.94384 : 0;
                         setLatDeg(Math.floor(Math.abs(la))); setLatMin(((Math.abs(la) % 1) * 60).toFixed(2)); setLatDir(la >= 0 ? 'N' : 'S');
                         setLngDeg(Math.floor(Math.abs(lo))); setLngMin(((Math.abs(lo) % 1) * 60).toFixed(2)); setLngDir(lo >= 0 ? 'E' : 'W');
                         setVelocity({ speed: sog, course: p.coords.heading || 0 });
-                        fetchSolarTimes(la, lo, sog, p.coords.heading || 0);
-                    }, (err) => { setIsGpsActive(false); setIsLoadingLocation(false); }, { enableHighAccuracy: true });
+                        calculateSolarTimes(la, lo, sog, p.coords.heading || 0);
+                    }, (err) => { setIsGpsActive(false); }, { enableHighAccuracy: true });
                 }
             };
 
@@ -277,6 +378,30 @@
 
             return (
                 <div className={`min-h-screen bg-stone-100 text-stone-800 font-sans pb-10 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                    
+                    {showUpdatePopup && (
+                        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-stone-900/70 backdrop-blur-sm animate-in fade-in" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden border-2 border-emerald-500">
+                                <div className="bg-emerald-100 p-5 text-center">
+                                    <Sparkles size={32} className="mx-auto text-emerald-600 mb-2" />
+                                    <h3 className="font-bold text-lg text-emerald-900">{t.updTitle}</h3>
+                                </div>
+                                <div className="p-5 space-y-3 text-sm text-stone-700">
+                                    <ul className={`space-y-2 list-disc ${isRTL ? 'pr-4' : 'pl-4'} marker:text-emerald-500`}>
+                                        <li>{t.updPoint1}</li>
+                                        <li>{t.updPoint2}</li>
+                                        <li>{t.updPoint3}</li>
+                                        <li className="font-medium text-emerald-800">{t.updPoint4}</li>
+                                    </ul>
+                                    <p className="mt-4 pt-3 border-t border-stone-200 text-xs italic text-stone-500 text-center">{t.updPoint5}</p>
+                                    <button onClick={() => { localStorage.setItem('hasSeenUpdateV5_Offline', 'true'); setShowUpdatePopup(false); }} className="w-full mt-4 bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800 transition">
+                                        {t.updBtn}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {showCompass && latDeg !== '' && lngDeg !== '' && (
                         <QiblaCompass lat={parseFloat(latDeg)} lng={parseFloat(lngDeg)} onClose={() => setShowCompass(false)} t={t} />
                     )}
@@ -308,7 +433,10 @@
                         <div className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} flex gap-2`} dir="ltr">
                             <button onClick={() => setShowCompass(true)} className="bg-emerald-500/20 text-emerald-300 p-2 rounded-full border border-emerald-400/30 active:scale-95"><CompassIcon size={18} /></button>
                             <button onClick={() => setShowInfo(true)} className="bg-white/10 p-2 rounded-full border border-white/20 active:scale-95"><InfoCircle size={18} /></button>
-                            <button onClick={() => setLang(lang === 'nl' ? 'en' : lang === 'en' ? 'ar' : 'nl')} className="bg-white/10 p-2 rounded-full border border-white/20 active:scale-95 flex items-center justify-center font-bold text-xs w-9 h-9 uppercase">
+                            <button onClick={() => {
+                                const cycle = ['en', 'nl', 'ar', 'id'];
+                                setLang(cycle[(cycle.indexOf(lang) + 1) % cycle.length]);
+                            }} className="bg-white/10 p-2 rounded-full border border-white/20 active:scale-95 flex items-center justify-center font-bold text-xs w-9 h-9 uppercase">
                                 {lang === 'ar' ? 'ع' : lang}
                             </button>
                         </div>
@@ -345,7 +473,7 @@
                                     {isGpsActive ? t.btnGPS : t.btnGPSOff}
                                 </button>
                                 <button onClick={doCalc} disabled={isGpsActive} className="flex-[2] bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-md disabled:bg-stone-300">
-                                    {isLoadingLocation && !isGpsActive ? <Loader2 className="animate-spin mx-auto"/> : t.btnCalc}
+                                    {t.btnCalc}
                                 </button>
                             </div>
                         </section>
@@ -377,7 +505,7 @@
                                     <div className="bg-stone-50 py-2 border-r border-white"><p className="text-[7px] font-bold text-stone-400 uppercase">{t.asr}</p><p className="text-[11px] font-medium text-stone-700">{solarTimes.asr}</p></div>
                                     <div className="bg-emerald-50 py-2 border-r border-white"><p className="text-[7px] font-bold text-emerald-800 uppercase">{t.maghrib}</p><p className="text-[11px] font-bold text-stone-800">{solarTimes.maghrib}</p></div>
                                     <div className="bg-stone-50 py-2 border-r border-white"><p className="text-[7px] font-bold text-stone-400 uppercase">{t.isha}</p><p className="text-[11px] font-medium text-stone-700">{solarTimes.isha}{fallbackApplied.isha && <span className="text-amber-500">*</span>}</p></div>
-                                    <div className="bg-emerald-100/50 py-2 rounded-r-lg"><p className="text-[7px] font-bold text-emerald-800 uppercase">{t.nextFajr}</p><p className="text-[11px] font-bold text-stone-800">{solarTimes.nextFajr}{fallbackApplied.fajr && <span className="text-amber-500">*</span>}</p></div>
+                                    <div className="bg-emerald-100/50 py-2 rounded-r-lg"><p className="text-[7px] font-bold text-emerald-800 uppercase">{t.nextFajr}</p><p className="text-[11px] font-bold text-stone-800">{solarTimes.nextFajr}{fallbackApplied.nextFajr && <span className="text-amber-500">*</span>}</p></div>
                                 </div>
                             </section>
                         )}
