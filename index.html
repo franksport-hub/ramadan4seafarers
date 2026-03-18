@@ -34,13 +34,13 @@
         const CompassIcon = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></Icon>;
         const Anchor = (p) => <Icon {...p}><circle cx="12" cy="5" r="3"/><line x1="12" x2="12" y1="8" y2="22"/><line x1="5" x2="19" y1="12" y2="12"/><path d="M5 12c0 3.866 3.134 7 7 7s7-3.134 7-7"/></Icon>;
         const Loader2 = (p) => <Icon {...p}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></Icon>;
-        const Globe = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></Icon>;
         const Trash2 = (p) => <Icon {...p}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></Icon>;
         const Sparkles = (p) => <Icon {...p}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></Icon>;
         const InfoCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></Icon>;
         const ChevronLeft = (p) => <Icon {...p}><path d="m15 18-6-6 6-6"/></Icon>;
         const XIcon = (p) => <Icon {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Icon>;
         const CalendarIcon = (p) => <Icon {...p}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></Icon>;
+        const HeartIcon = (p) => <Icon {...p}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></Icon>;
 
         // --- Islamic Events 2026 ---
         const islamicEvents = [
@@ -63,11 +63,11 @@
                 qiblaTitle: "Qibla Kompas", qiblaInst: "Draai de roos om gelijk te stellen met het kompas van het schip.",
                 infoTitle: "Hoe worden de tijden berekend?", infoBaseTitle: "1. Astronomische Basis", infoBase: "Tijden gebaseerd op de zon t.o.v. horizon op jouw GPS-positie.", infoDRTitle: "2. Dead Reckoning", infoDR: "Als het schip vaart, wordt de aankomstpositie voor de zonsondergang berekend.", infoHighLatTitle: "3. Witte Nachten", infoHighLat: "Bij het ontbreken van astronomische schemering wordt de 90-minuten regel toegepast (*).", btnClose: "Begrepen",
                 updTitle: "Nieuw in Versie 3",
-                updPoint1: "De klok telt nu slim af naar het mólgende gebed (niet meer alleen naar Maghrib).",
-                updPoint2: "Nieuwe event-tracker! Je ziet nu precies hoeveel dagen het nog is tot Eid en andere feestdagen.",
-                updPoint3: "De taalknop ondersteunt nu Engels, Arabisch en je eigen toesteltaal.",
-                updPoint4: "Bugfix: Probleem met vastlopende timer na reset is verholpen.",
-                updBtn: "Doorgaan"
+                updPoint1: "De klok telt nu slim af naar het volgende gebed.",
+                updPoint2: "Nieuwe event-tracker! Zie precies hoeveel dagen tot Eid.",
+                updPoint3: "De taalknop wisselt nu tussen Engels, Arabisch en je toesteltaal.",
+                updPoint4: "Bugfix: Probleem met vastlopende timer is verholpen.",
+                updBtn: "Doorgaan", support: "Steun de ontwikkelaar"
             },
             en: {
                 title: "Islam at sea", subtitle: "Prayer times & reflection at sea.",
@@ -80,11 +80,11 @@
                 qiblaTitle: "Qibla Compass", qiblaInst: "Rotate the dial to align with the ship's heading.",
                 infoTitle: "How are the times calculated?", infoBaseTitle: "1. Astronomical Base", infoBase: "Times based on the sun relative to horizon.", infoDRTitle: "2. Dead Reckoning", infoDR: "If moving, arrival position is calculated.", infoHighLatTitle: "3. White Nights", infoHighLat: "When astronomical twilight is missing, the 90-minute rule applies (*).", btnClose: "Understood",
                 updTitle: "New in Version 3",
-                updPoint1: "The countdown now intelligently tracks the next upcoming prayer.",
-                updPoint2: "New event tracker! See how many days are left until Eid and other holidays.",
-                updPoint3: "Language button now toggles between English, Arabic, and your device language.",
-                updPoint4: "Bugfix: Resolved an issue where the timer froze after data reset.",
-                updBtn: "Continue"
+                updPoint1: "The countdown now intelligently tracks the next prayer.",
+                updPoint2: "New event tracker! See days left until Eid.",
+                updPoint3: "Language button toggles English, Arabic, and device language.",
+                updPoint4: "Bugfix: Resolved an issue where the timer froze.",
+                updBtn: "Continue", support: "Support the developer"
             },
             ar: {
                 title: "الإسلام في البحر", subtitle: "أوقات الصلاة والتأمل في عرض البحر.",
@@ -100,8 +100,8 @@
                 updPoint1: "العد التنازلي الآن يتتبع الصلاة القادمة بذكاء.",
                 updPoint2: "متتبع أحداث جديد! اعرف الأيام المتبقية حتى العيد.",
                 updPoint3: "زر اللغة يدعم الآن الإنجليزية، العربية، ولغة جهازك.",
-                updPoint4: "إصلاح خطأ: تم حل مشكلة توقف المؤقت بعد إعادة تعيين البيانات.",
-                updBtn: "متابعة"
+                updPoint4: "إصلاح خطأ: تم حل مشكلة توقف المؤقت.",
+                updBtn: "متابعة", support: "ادعم المطور"
             },
             id: {
                 title: "Islam at sea", subtitle: "Waktu salat & refleksi di laut.",
@@ -112,13 +112,13 @@
                 refTitle: "Catatan & Niat", refPlaceholder: "Tulis pikiran Anda...", btnPrompt: "Saran",
                 copyright: "© 2026 Islam at sea", legendLive: "• Dikoreksi untuk arah & kecepatan.", legendFallback: "* Disesuaikan dengan aturan 90 menit.",
                 qiblaTitle: "Kompas Kiblat", qiblaInst: "Putar cincin untuk menyelaraskan dengan arah kapal.",
-                infoTitle: "Bagaimana waktu dihitung?", infoBaseTitle: "1. Basis Astronomi", infoBase: "Waktu berdasarkan posisi matahari.", infoDRTitle: "2. Dead Reckoning", infoDR: "Jika kapal bergerak, waktu dihitung berdasarkan prediksi posisi.", infoHighLatTitle: "3. Malam Putih", infoHighLat: "Aturan 90 menit digunakan saat tidak ada senja astronomi (*).", btnClose: "Mengerti",
+                infoTitle: "Bagaimana waktu dihitung?", infoBaseTitle: "1. Basis Astronomi", infoBase: "Waktu berdasarkan posisi matahari.", infoDRTitle: "2. Dead Reckoning", infoDR: "Jika kapal bergerak, waktu dihitung berdasarkan prediksi posisi tiba.", infoHighLatTitle: "3. Malam Putih", infoHighLat: "Aturan 90 menit digunakan saat tidak ada senja astronomi (*).", btnClose: "Mengerti",
                 updTitle: "Apa yang baru di Versi 3",
                 updPoint1: "Hitung mundur sekarang melacak waktu salat berikutnya.",
                 updPoint2: "Pelacak acara baru! Lihat sisa hari hingga Idul Fitri.",
-                updPoint3: "Tombol bahasa sekarang mendukung Inggris, Arab, dan bahasa perangkat Anda.",
-                updPoint4: "Perbaikan: Masalah timer macet setelah reset data telah diselesaikan.",
-                updBtn: "Lanjutkan"
+                updPoint3: "Tombol bahasa mendukung Inggris, Arab, dan bahasa perangkat.",
+                updPoint4: "Perbaikan: Masalah timer macet telah diselesaikan.",
+                updBtn: "Lanjutkan", support: "Dukung pengembang"
             }
         };
 
@@ -214,7 +214,6 @@
         };
 
         function App() {
-            // --- Language System ---
             const getDeviceLang = () => navigator.language.split('-')[0];
             const [nativeLang] = useState(() => {
                 const sysLang = getDeviceLang();
@@ -260,20 +259,18 @@
             const watchIdRef = useRef(null);
 
             useEffect(() => {
-                const hasSeenUpdate = localStorage.getItem('hasSeenUpdateV3');
+                const hasSeenUpdate = localStorage.getItem('hasSeenUpdateV4');
                 if (!hasSeenUpdate) setShowUpdatePopup(true);
             }, []);
 
-            // --- Event Tracker ---
             useEffect(() => {
                 const now = new Date();
                 const nextFestival = islamicEvents.find(e => e.date > now);
                 if (nextFestival) {
-                    const diffTime = Math.abs(nextFestival.date - now);
+                    const diffTime = nextFestival.date - now;
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     
                     let festivalName = nextFestival.name;
-                    // Translate common names if in Dutch/Arabic
                     if (lang === 'nl' && festivalName === 'Islamic New Year') festivalName = 'Islamitisch Nieuwjaar';
                     if (lang === 'ar') {
                         if (festivalName === 'Eid al-Fitr') festivalName = 'عيد الفطر';
@@ -298,7 +295,7 @@
                 localStorage.setItem('lngDeg', lngDeg); localStorage.setItem('lngMin', lngMin); localStorage.setItem('lngDir', lngDir);
             }, [latDeg, latMin, latDir, lngDeg, lngMin, lngDir]);
 
-            // --- Dynamic Prayer Countdown ---
+            // --- Geoptimaliseerde en Vaste Countdown Logica ---
             useEffect(() => {
                 let interval;
                 if (solarDates) {
@@ -314,18 +311,27 @@
                             { name: t.nextFajr, date: solarDates.nextFajr }
                         ];
 
-                        const nextPrayer = prayers.find(p => p.date > now) || prayers[prayers.length - 1];
+                        // Vind alle gebeden in de toekomst en sorteer ze voor de zekerheid
+                        const futurePrayers = prayers.filter(p => p.date && p.date > now).sort((a, b) => a.date - b.date);
                         
-                        const diff = nextPrayer.date - now;
-                        if(diff > 0) {
-                            const h = Math.floor(diff / 3600000);
-                            const m = Math.floor((diff % 3600000) / 60000);
-                            const s = Math.floor((diff % 60000) / 1000);
-                            setCountdown(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
-                            setNextEvent(`${t.timeTill} ${nextPrayer.name}`);
+                        // Pak het allereerste toekomstige gebed, of val terug op de laatste (Fajr morgen)
+                        const nextPrayer = futurePrayers.length > 0 ? futurePrayers[0] : prayers[prayers.length - 1];
+                        
+                        if (nextPrayer && nextPrayer.date) {
+                            const diff = nextPrayer.date - now;
+                            if(diff > 0) {
+                                const h = Math.floor(diff / 3600000);
+                                const m = Math.floor((diff % 3600000) / 60000);
+                                const s = Math.floor((diff % 60000) / 1000);
+                                setCountdown(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
+                                setNextEvent(`${t.timeTill} ${nextPrayer.name}`);
+                            } else {
+                                setCountdown('00:00:00');
+                            }
                         }
                     };
-                    updateTimer(); interval = setInterval(updateTimer, 1000);
+                    updateTimer(); 
+                    interval = setInterval(updateTimer, 1000);
                 }
                 return () => clearInterval(interval);
             }, [solarDates, t]);
@@ -447,7 +453,7 @@
 
             const getCurrentDecimalLat = () => { if(!latDeg) return null; let lat = parseInt(latDeg) + (parseFloat(latMin || 0) / 60); return latDir === 'S' ? -lat : lat; };
             const getCurrentDecimalLng = () => { if(!lngDeg) return null; let lng = parseInt(lngDeg) + (parseFloat(lngMin || 0) / 60); return lngDir === 'W' ? -lng : lng; };
-            const isFajrPassed = solarDates ? new Date() > solarDates.fajr : false;
+            const isFajrPassed = solarDates && solarDates.fajr ? new Date() > solarDates.fajr : false;
 
             return (
                 <div className={`min-h-screen bg-stone-100 text-stone-800 font-sans pb-10 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -465,7 +471,7 @@
                                         <li>{t.updPoint3}</li>
                                         <li className="font-medium text-emerald-800">{t.updPoint4}</li>
                                     </ul>
-                                    <button onClick={() => { localStorage.setItem('hasSeenUpdateV3', 'true'); setShowUpdatePopup(false); }} className="w-full mt-6 bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800 transition">
+                                    <button onClick={() => { localStorage.setItem('hasSeenUpdateV4', 'true'); setShowUpdatePopup(false); }} className="w-full mt-6 bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800 transition">
                                         {t.updBtn}
                                     </button>
                                 </div>
@@ -488,6 +494,14 @@
                                     <div><h4 className="font-bold text-emerald-800">{t.infoBaseTitle}</h4><p>{t.infoBase}</p></div>
                                     <div className="border-t pt-3"><h4 className="font-bold text-emerald-800">{t.infoDRTitle}</h4><p>{t.infoDR}</p></div>
                                     <div className="border-t pt-3"><h4 className="font-bold text-emerald-800">{t.infoHighLatTitle}</h4><p>{t.infoHighLat}</p></div>
+                                    
+                                    {/* PayPal Donatie Knop */}
+                                    <div className="mt-4 pt-4 border-t border-stone-200 text-center">
+                                        <a href="https://www.paypal.com/donate/?business=frankrburg@gmail.com&no_recurring=0&item_name=Support+Islam+at+Sea" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full font-bold hover:bg-emerald-200 transition">
+                                            <HeartIcon size={16} className="text-emerald-600"/> {t.support}
+                                        </a>
+                                    </div>
+                                    
                                     <button onClick={() => setShowInfo(false)} className="w-full mt-4 bg-stone-100 py-2.5 rounded-lg font-bold">{t.btnClose}</button>
                                 </div>
                             </div>
@@ -550,7 +564,7 @@
                             <p className="text-5xl font-light tabular-nums tracking-tighter text-stone-900 relative z-10" dir="ltr">{countdown}</p>
                             {!solarDates && <p className="text-[10px] mt-2 text-stone-400">{t.waitingForLoc}</p>}
                             
-                            {/* EVENT TRACKER (Nieuw) */}
+                            {/* EVENT TRACKER */}
                             {upcomingFestival && (
                                 <div className="mt-4 inline-flex items-center gap-1.5 bg-white/60 px-3 py-1.5 rounded-full border border-emerald-200 shadow-sm relative z-10">
                                     <CalendarIcon size={14} className="text-emerald-600" />
