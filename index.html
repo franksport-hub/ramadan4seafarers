@@ -12,14 +12,10 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        /* Voorkom scrollen tijdens het draaien van het kompas */
-        .touch-none { touch-action: none; }
-    </style>
+    <style>.touch-none { touch-action: none; }</style>
 </head>
 <body class="bg-stone-100">
     <div id="root"></div>
@@ -44,58 +40,84 @@
         const InfoCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></Icon>;
         const ChevronLeft = (p) => <Icon {...p}><path d="m15 18-6-6 6-6"/></Icon>;
         const XIcon = (p) => <Icon {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Icon>;
+        const CalendarIcon = (p) => <Icon {...p}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></Icon>;
 
-        // --- Vertalingen ---
+        // --- Islamic Events 2026 ---
+        const islamicEvents = [
+            { name: "Eid al-Fitr", date: new Date(2026, 2, 20) },
+            { name: "Eid al-Adha", date: new Date(2026, 4, 27) },
+            { name: "Islamic New Year", date: new Date(2026, 6, 16) },
+            { name: "Ashura", date: new Date(2026, 6, 25) },
+            { name: "Mawlid an-Nabi", date: new Date(2026, 8, 25) }
+        ];
+
         const translations = {
             nl: {
                 title: "Islam at sea", subtitle: "Gebedstijden & Bezinning op volle zee.",
                 navTitle: "Positie & Berekening", btnGPS: "Actief", btnGPSOff: "GPS", btnCalc: "Bereken",
                 fajr: "Fajr", nextFajr: "Fajr Morgen", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha",
-                timeTillFajr: "Tijd tot Fajr", timeTillMaghrib: "Tijd tot Maghrib",
+                timeTill: "Tijd tot", daysUntil: "Nog", days: "dagen tot", todayIs: "Vandaag is",
                 waitingForLoc: "Geef een locatie op of activeer GPS...",
                 refTitle: "Notities & Intenties", refPlaceholder: "Schrijf hier je gedachten...", btnPrompt: "Suggestie",
-                copyright: "© 2026 Islam at sea",
-                legendLive: "• Gecorrigeerd voor DR koers en vaart.", legendFallback: "* Aangepast via 90-minuten regel.",
+                copyright: "© 2026 Islam at sea", legendLive: "• Gecorrigeerd voor DR koers en vaart.", legendFallback: "* Aangepast via 90-minuten regel.",
                 qiblaTitle: "Qibla Kompas", qiblaInst: "Draai de roos om gelijk te stellen met het kompas van het schip.",
-                infoTitle: "Hoe worden de tijden berekend?", infoBaseTitle: "1. Astronomische Basis", infoBase: "Tijden gebaseerd op de zon t.o.v. horizon op jouw GPS-positie.", infoDRTitle: "2. Dead Reckoning", infoDR: "Als het schip vaart, wordt de aankomstpositie voor de zonsondergang en de volgende zonsopkomst berekend.", infoHighLatTitle: "3. Witte Nachten", infoHighLat: "Bij het ontbreken van astronomische schemering wordt de 90-minuten regel toegepast (*).", btnClose: "Begrepen",
-                updTitle: "Nieuw in deze update",
-                updPoint1: "De tijd voor 'Zonsopkomst' is verwijderd om ruimte te maken voor de Fajr van morgen (berekend met DR).",
-                updPoint2: "Fajr tijden van vandaag worden nu grijs als ze al voorbij zijn.",
-                updPoint3: "Er is een nieuw interactief Qibla-kompas bovenaan het scherm. Je kunt de ring handmatig kalibreren met het scheepskompas.",
+                infoTitle: "Hoe worden de tijden berekend?", infoBaseTitle: "1. Astronomische Basis", infoBase: "Tijden gebaseerd op de zon t.o.v. horizon op jouw GPS-positie.", infoDRTitle: "2. Dead Reckoning", infoDR: "Als het schip vaart, wordt de aankomstpositie voor de zonsondergang berekend.", infoHighLatTitle: "3. Witte Nachten", infoHighLat: "Bij het ontbreken van astronomische schemering wordt de 90-minuten regel toegepast (*).", btnClose: "Begrepen",
+                updTitle: "Nieuw in Versie 3",
+                updPoint1: "De klok telt nu slim af naar het mólgende gebed (niet meer alleen naar Maghrib).",
+                updPoint2: "Nieuwe event-tracker! Je ziet nu precies hoeveel dagen het nog is tot Eid en andere feestdagen.",
+                updPoint3: "De taalknop ondersteunt nu Engels, Arabisch en je eigen toesteltaal.",
+                updPoint4: "Bugfix: Probleem met vastlopende timer na reset is verholpen.",
                 updBtn: "Doorgaan"
             },
             en: {
                 title: "Islam at sea", subtitle: "Prayer times & reflection at sea.",
                 navTitle: "Position & Calculation", btnGPS: "Active", btnGPSOff: "GPS", btnCalc: "Calc",
                 fajr: "Fajr", nextFajr: "Next Fajr", dhuhr: "Dhuhr", asr: "Asr", maghrib: "Maghrib", isha: "Isha",
-                timeTillFajr: "Time till Fajr", timeTillMaghrib: "Time till Maghrib",
+                timeTill: "Time till", daysUntil: "", days: "days until", todayIs: "Today is",
                 waitingForLoc: "Enter a location or activate GPS...",
                 refTitle: "Notes & Intentions", refPlaceholder: "Write your thoughts...", btnPrompt: "Suggestion",
-                copyright: "© 2026 Islam at sea",
-                legendLive: "• Corrected for DR course and speed.", legendFallback: "* Adjusted via 90-minute rule.",
-                qiblaTitle: "Qibla Compass", qiblaInst: "Rotate the dial to align with the ship's gyro or magnetic heading.",
-                infoTitle: "How are the times calculated?", infoBaseTitle: "1. Astronomical Base", infoBase: "Times based on the sun relative to horizon.", infoDRTitle: "2. Dead Reckoning", infoDR: "If the ship is moving, the arrival position for sunset and the next dawn is calculated.", infoHighLatTitle: "3. White Nights", infoHighLat: "When astronomical twilight is missing, the 90-minute rule applies (*).", btnClose: "Understood",
-                updTitle: "What's new in this update?",
-                updPoint1: "The 'Sunrise' time has been removed to make room for tomorrow's Fajr (calculated with DR).",
-                updPoint2: "Today's Fajr times will now turn gray when they have passed.",
-                updPoint3: "There is a new interactive Qibla compass at the top. You can manually calibrate the dial to match the ship's heading.",
+                copyright: "© 2026 Islam at sea", legendLive: "• Corrected for DR course and speed.", legendFallback: "* Adjusted via 90-minute rule.",
+                qiblaTitle: "Qibla Compass", qiblaInst: "Rotate the dial to align with the ship's heading.",
+                infoTitle: "How are the times calculated?", infoBaseTitle: "1. Astronomical Base", infoBase: "Times based on the sun relative to horizon.", infoDRTitle: "2. Dead Reckoning", infoDR: "If moving, arrival position is calculated.", infoHighLatTitle: "3. White Nights", infoHighLat: "When astronomical twilight is missing, the 90-minute rule applies (*).", btnClose: "Understood",
+                updTitle: "New in Version 3",
+                updPoint1: "The countdown now intelligently tracks the next upcoming prayer.",
+                updPoint2: "New event tracker! See how many days are left until Eid and other holidays.",
+                updPoint3: "Language button now toggles between English, Arabic, and your device language.",
+                updPoint4: "Bugfix: Resolved an issue where the timer froze after data reset.",
                 updBtn: "Continue"
+            },
+            ar: {
+                title: "الإسلام في البحر", subtitle: "أوقات الصلاة والتأمل في عرض البحر.",
+                navTitle: "الموقع والحساب", btnGPS: "نشط", btnGPSOff: "GPS", btnCalc: "احسب",
+                fajr: "الفجر", nextFajr: "الفجر غداً", dhuhr: "الظهر", asr: "العصر", maghrib: "المغرب", isha: "العشاء",
+                timeTill: "الوقت حتى", daysUntil: "باقي", days: "أيام على", todayIs: "اليوم هو",
+                waitingForLoc: "أدخل موقعاً أو قم بتفعيل GPS...",
+                refTitle: "ملاحظات ونوايا", refPlaceholder: "اكتب أفكارك هنا...", btnPrompt: "اقتراح",
+                copyright: "© 2026 Islam at sea", legendLive: "• مصحح لسرعة ومسار السفينة.", legendFallback: "* تم التعديل بقاعدة الـ 90 دقيقة.",
+                qiblaTitle: "بوصلة القبلة", qiblaInst: "قم بتدوير القرص ليتماشى مع بوصلة السفينة.",
+                infoTitle: "كيف يتم حساب الأوقات؟", infoBaseTitle: "1. الأساس الفلكي", infoBase: "تعتمد على زاوية الشمس.", infoDRTitle: "2. الحساب الملاحي", infoDR: "يتم حساب الموقع المتوقع إذا كانت السفينة تتحرك.", infoHighLatTitle: "3. الليالي البيضاء", infoHighLat: "تُطبق قاعدة الـ 90 دقيقة عند غياب الشفق (*).", btnClose: "مفهوم",
+                updTitle: "الجديد في الإصدار 3",
+                updPoint1: "العد التنازلي الآن يتتبع الصلاة القادمة بذكاء.",
+                updPoint2: "متتبع أحداث جديد! اعرف الأيام المتبقية حتى العيد.",
+                updPoint3: "زر اللغة يدعم الآن الإنجليزية، العربية، ولغة جهازك.",
+                updPoint4: "إصلاح خطأ: تم حل مشكلة توقف المؤقت بعد إعادة تعيين البيانات.",
+                updBtn: "متابعة"
             },
             id: {
                 title: "Islam at sea", subtitle: "Waktu salat & refleksi di laut.",
                 navTitle: "Posisi & Perhitungan", btnGPS: "Aktif", btnGPSOff: "GPS", btnCalc: "Hitung",
                 fajr: "Subuh", nextFajr: "Subuh Besok", dhuhr: "Dzuhur", asr: "Ashar", maghrib: "Maghrib", isha: "Isya",
-                timeTillFajr: "Waktu hingga Subuh", timeTillMaghrib: "Waktu hingga Maghrib",
+                timeTill: "Waktu hingga", daysUntil: "Sisa", days: "hari menuju", todayIs: "Hari ini adalah",
                 waitingForLoc: "Masukkan lokasi atau aktifkan GPS...",
                 refTitle: "Catatan & Niat", refPlaceholder: "Tulis pikiran Anda...", btnPrompt: "Saran",
-                copyright: "© 2026 Islam at sea",
-                legendLive: "• Dikoreksi untuk arah & kecepatan.", legendFallback: "* Disesuaikan dengan aturan 90 menit.",
+                copyright: "© 2026 Islam at sea", legendLive: "• Dikoreksi untuk arah & kecepatan.", legendFallback: "* Disesuaikan dengan aturan 90 menit.",
                 qiblaTitle: "Kompas Kiblat", qiblaInst: "Putar cincin untuk menyelaraskan dengan arah kapal.",
-                infoTitle: "Bagaimana waktu dihitung?", infoBaseTitle: "1. Basis Astronomi", infoBase: "Waktu berdasarkan posisi matahari.", infoDRTitle: "2. Dead Reckoning", infoDR: "Jika kapal bergerak, waktu dihitung berdasarkan prediksi posisi tiba.", infoHighLatTitle: "3. Malam Putih", infoHighLat: "Aturan 90 menit digunakan saat tidak ada senja astronomi (*).", btnClose: "Mengerti",
-                updTitle: "Apa yang baru di pembaruan ini?",
-                updPoint1: "Waktu 'Matahari terbit' dihapus untuk memberi ruang bagi Subuh besok (dihitung dengan DR).",
-                updPoint2: "Waktu Subuh hari ini akan menjadi abu-abu jika sudah lewat.",
-                updPoint3: "Ada kompas Kiblat interaktif baru di bagian atas. Anda dapat mengkalibrasi cincin secara manual agar sesuai dengan kompas kapal.",
+                infoTitle: "Bagaimana waktu dihitung?", infoBaseTitle: "1. Basis Astronomi", infoBase: "Waktu berdasarkan posisi matahari.", infoDRTitle: "2. Dead Reckoning", infoDR: "Jika kapal bergerak, waktu dihitung berdasarkan prediksi posisi.", infoHighLatTitle: "3. Malam Putih", infoHighLat: "Aturan 90 menit digunakan saat tidak ada senja astronomi (*).", btnClose: "Mengerti",
+                updTitle: "Apa yang baru di Versi 3",
+                updPoint1: "Hitung mundur sekarang melacak waktu salat berikutnya.",
+                updPoint2: "Pelacak acara baru! Lihat sisa hari hingga Idul Fitri.",
+                updPoint3: "Tombol bahasa sekarang mendukung Inggris, Arab, dan bahasa perangkat Anda.",
+                updPoint4: "Perbaikan: Masalah timer macet setelah reset data telah diselesaikan.",
                 updBtn: "Lanjutkan"
             }
         };
@@ -103,10 +125,10 @@
         const humanistPrompts = {
             nl: ["Waar ben ik vandaag dankbaar voor?", "Welke intentie zet ik vandaag?", "De zee is geduldig, hoe kan ik dat ook zijn?", "Wat wens ik de mensen thuis toe?", "Wat leer ik van de stilte?"],
             en: ["What am I grateful for today?", "What intention am I setting?", "The sea is patient, how can I be too?", "What do I wish for loved ones?", "What does silence teach me?"],
+            ar: ["على ماذا أنا ممتن اليوم؟", "ما هي نيتي اليوم؟", "البحر صبور، كيف يمكنني أن أكون كذلك؟", "ماذا أتمنى لأحبائي؟", "ماذا يعلمني الصمت؟"],
             id: ["Apa yang saya syukuri hari ini?", "Niat apa yang saya tetapkan hari ini?", "Laut itu sabar, bagaimana saya bisa begitu juga?", "Apa yang saya harapkan untuk orang terkasih?", "Apa yang keheningan ajarkan pada saya?"]
         };
 
-        // --- COMPASS COMPONENT ---
         const QiblaCompass = ({ lat, lng, onClose, t }) => {
             const [rotation, setRotation] = useState(0);
             const [qibla, setQibla] = useState(0);
@@ -157,47 +179,32 @@
                 e.target.releasePointerCapture(e.pointerId);
             };
 
-            const ticks = Array.from({ length: 72 }).map((_, i) => i * 5);
-
             return (
-                <div className="fixed inset-0 z-[70] bg-stone-900 flex flex-col items-center justify-between p-6 animate-in fade-in">
+                <div className="fixed inset-0 z-[70] bg-stone-900 flex flex-col items-center justify-between p-6 animate-in fade-in" dir="ltr">
                     <header className="w-full flex justify-between items-center text-white mt-4">
                         <button onClick={onClose} className="p-2 bg-white/10 rounded-full hover:bg-white/20"><ChevronLeft size={24}/></button>
                         <h2 className="font-bold text-lg">{t.qiblaTitle}</h2>
                         <div className="w-10"></div>
                     </header>
-                    
                     <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm">
                         <p className="text-emerald-400 font-mono text-xl mb-4 text-center">
                             Qibla: {Math.round(qibla)}° <br/>
                             <span className="text-xs text-stone-400">Heading (N): {Math.round((360 - rotation) % 360)}°</span>
                         </p>
-                        
                         <div className="relative w-80 h-80">
-                            <div className="absolute inset-0 transition-transform duration-100 ease-out pointer-events-none z-10"
-                                 style={{ transform: `rotate(${qibla + rotation}deg)` }}>
+                            <div className="absolute inset-0 transition-transform duration-100 ease-out pointer-events-none z-10" style={{ transform: `rotate(${qibla + rotation}deg)` }}>
                                 <div className="absolute top-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[40px] border-b-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
                             </div>
-
-                            <div 
-                                ref={compassRef}
-                                onPointerDown={handlePointerDown}
-                                onPointerMove={handlePointerMove}
-                                onPointerUp={handlePointerUp}
-                                onPointerCancel={handlePointerUp}
-                                className="absolute inset-0 rounded-full border-4 border-emerald-900 bg-stone-800 touch-none cursor-grab active:cursor-grabbing shadow-[0_0_30px_rgba(0,0,0,0.5)]"
-                                style={{ transform: `rotate(${rotation}deg)` }}
-                            >
-                                {ticks.map(deg => (
+                            <div ref={compassRef} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} className="absolute inset-0 rounded-full border-4 border-emerald-900 bg-stone-800 touch-none cursor-grab active:cursor-grabbing shadow-[0_0_30px_rgba(0,0,0,0.5)]" style={{ transform: `rotate(${rotation}deg)` }}>
+                                {Array.from({ length: 72 }).map((_, i) => i * 5).map(deg => (
                                     <div key={deg} className="absolute inset-0" style={{ transform: `rotate(${deg}deg)` }}>
                                         <div className={`mx-auto bg-stone-500 ${deg % 90 === 0 ? 'w-1.5 h-4 bg-emerald-500' : deg % 30 === 0 ? 'w-1 h-3' : 'w-0.5 h-2'}`}></div>
                                     </div>
                                 ))}
-                                
-                                <span className="absolute top-6 left-1/2 -translate-x-1/2 text-white font-bold text-xl drop-shadow-md">N</span>
-                                <span className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white font-bold text-xl drop-shadow-md rotate-180">S</span>
-                                <span className="absolute right-6 top-1/2 -translate-y-1/2 text-white font-bold text-xl drop-shadow-md -rotate-90">E</span>
-                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-white font-bold text-xl drop-shadow-md rotate-90">W</span>
+                                <span className="absolute top-6 left-1/2 -translate-x-1/2 text-white font-bold text-xl">N</span>
+                                <span className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white font-bold text-xl rotate-180">S</span>
+                                <span className="absolute right-6 top-1/2 -translate-y-1/2 text-white font-bold text-xl -rotate-90">E</span>
+                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-white font-bold text-xl rotate(90deg)">W</span>
                             </div>
                         </div>
                         <p className="text-stone-400 text-sm mt-10 text-center max-w-xs">{t.qiblaInst}</p>
@@ -206,27 +213,33 @@
             );
         };
 
-        // --- HOOFD APPLICATIE ---
         function App() {
-            const getDeviceLang = () => {
-                const l = navigator.language || 'en';
-                if (l.startsWith('nl')) return 'nl';
-                if (l.startsWith('id')) return 'id';
-                return 'en';
-            };
-            const [lang, setLang] = useState(() => localStorage.getItem('appLang') || getDeviceLang());
+            // --- Language System ---
+            const getDeviceLang = () => navigator.language.split('-')[0];
+            const [nativeLang] = useState(() => {
+                const sysLang = getDeviceLang();
+                return translations[sysLang] ? sysLang : 'en'; 
+            });
+            const [lang, setLang] = useState(() => localStorage.getItem('appLang') || nativeLang);
             const t = translations[lang];
 
+            const toggleLanguage = () => {
+                const langCycle = Array.from(new Set([nativeLang, 'en', 'ar']));
+                const currentIndex = langCycle.indexOf(lang);
+                setLang(langCycle[(currentIndex + 1) % langCycle.length]);
+            };
+
+            const isRTL = lang === 'ar';
+
             const [showUpdatePopup, setShowUpdatePopup] = useState(false);
-            
             const [journalText, setJournalText] = useState('');
             const [entries, setEntries] = useState(() => JSON.parse(localStorage.getItem('ramadanEntries') || '[]'));
-
+            
             const [solarDates, setSolarDates] = useState(null);
-            const [nextFajrDate, setNextFajrDate] = useState(null);
             const [countdown, setCountdown] = useState('--:--:--');
             const [nextEvent, setNextEvent] = useState('');
-            
+            const [upcomingFestival, setUpcomingFestival] = useState('');
+
             const [showInfo, setShowInfo] = useState(false);
             const [showCompass, setShowCompass] = useState(false);
             const [fallbackApplied, setFallbackApplied] = useState({ fajr: false, isha: false, nextFajr: false });
@@ -242,22 +255,41 @@
             const [isLoadingLocation, setIsLoadingLocation] = useState(false);
             const [isGpsActive, setIsGpsActive] = useState(false);
             const [velocity, setVelocity] = useState({ speed: 0, course: 0 });
-            const [gpsHistory, setGpsHistory] = useState([]);
             
             const lastFetchRef = useRef(0);
             const watchIdRef = useRef(null);
 
             useEffect(() => {
-                const hasSeenUpdate = localStorage.getItem('hasSeenUpdateV2');
-                if (!hasSeenUpdate) {
-                    setShowUpdatePopup(true);
-                }
+                const hasSeenUpdate = localStorage.getItem('hasSeenUpdateV3');
+                if (!hasSeenUpdate) setShowUpdatePopup(true);
             }, []);
 
-            const closeUpdatePopup = () => {
-                localStorage.setItem('hasSeenUpdateV2', 'true');
-                setShowUpdatePopup(false);
-            };
+            // --- Event Tracker ---
+            useEffect(() => {
+                const now = new Date();
+                const nextFestival = islamicEvents.find(e => e.date > now);
+                if (nextFestival) {
+                    const diffTime = Math.abs(nextFestival.date - now);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    let festivalName = nextFestival.name;
+                    // Translate common names if in Dutch/Arabic
+                    if (lang === 'nl' && festivalName === 'Islamic New Year') festivalName = 'Islamitisch Nieuwjaar';
+                    if (lang === 'ar') {
+                        if (festivalName === 'Eid al-Fitr') festivalName = 'عيد الفطر';
+                        if (festivalName === 'Eid al-Adha') festivalName = 'عيد الأضحى';
+                        if (festivalName === 'Islamic New Year') festivalName = 'رأس السنة الهجرية';
+                        if (festivalName === 'Ashura') festivalName = 'عاشوراء';
+                        if (festivalName === 'Mawlid an-Nabi') festivalName = 'المولد النبوي';
+                    }
+
+                    if (diffDays === 0) {
+                        setUpcomingFestival(`${t.todayIs} ${festivalName}!`);
+                    } else {
+                        setUpcomingFestival(`${t.daysUntil} ${diffDays} ${t.days} ${festivalName}`);
+                    }
+                }
+            }, [lang, t]);
 
             useEffect(() => { localStorage.setItem('appLang', lang); }, [lang]);
             useEffect(() => { localStorage.setItem('ramadanEntries', JSON.stringify(entries)); }, [entries]);
@@ -266,34 +298,42 @@
                 localStorage.setItem('lngDeg', lngDeg); localStorage.setItem('lngMin', lngMin); localStorage.setItem('lngDir', lngDir);
             }, [latDeg, latMin, latDir, lngDeg, lngMin, lngDir]);
 
+            // --- Dynamic Prayer Countdown ---
             useEffect(() => {
                 let interval;
-                if (solarDates && nextFajrDate) {
+                if (solarDates) {
                     const updateTimer = () => {
                         const now = new Date();
-                        let target, eventName;
-                        if (now < solarDates.fajr) { target = solarDates.fajr; eventName = 'Fajr'; }
-                        else if (now < solarDates.iftar) { target = solarDates.iftar; eventName = 'Maghrib'; }
-                        else { target = nextFajrDate; eventName = 'Fajr'; }
                         
-                        const diff = target - now;
+                        const prayers = [
+                            { name: t.fajr, date: solarDates.fajr },
+                            { name: t.dhuhr, date: solarDates.dhuhr },
+                            { name: t.asr, date: solarDates.asr },
+                            { name: t.maghrib, date: solarDates.maghrib },
+                            { name: t.isha, date: solarDates.isha },
+                            { name: t.nextFajr, date: solarDates.nextFajr }
+                        ];
+
+                        const nextPrayer = prayers.find(p => p.date > now) || prayers[prayers.length - 1];
+                        
+                        const diff = nextPrayer.date - now;
                         if(diff > 0) {
                             const h = Math.floor(diff / 3600000);
                             const m = Math.floor((diff % 3600000) / 60000);
                             const s = Math.floor((diff % 60000) / 1000);
                             setCountdown(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
-                            setNextEvent(eventName);
+                            setNextEvent(`${t.timeTill} ${nextPrayer.name}`);
                         }
                     };
                     updateTimer(); interval = setInterval(updateTimer, 1000);
                 }
                 return () => clearInterval(interval);
-            }, [solarDates, nextFajrDate]);
+            }, [solarDates, t]);
 
             const fetchSolarTimes = async (latitude, longitude, speedKts = 0, course = 0) => {
-                const now = Date.now();
-                if (now - lastFetchRef.current < 60000 && isGpsActive) return; 
-                lastFetchRef.current = now;
+                const nowTime = Date.now();
+                if (nowTime - lastFetchRef.current < 60000 && isGpsActive) return; 
+                lastFetchRef.current = nowTime;
                 setIsLoadingLocation(true);
 
                 try {
@@ -304,17 +344,17 @@
                     tomorrow.setDate(tomorrow.getDate() + 1);
                     const tomorrowStr = tomorrow.toISOString().split('T')[0];
                     const resTom = await fetch(`https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&date=${tomorrowStr}&formatted=0`);
-                    let dataTom = await resTom.json();
+                    const dataTom = await resTom.json();
 
                     if (dataToday.status === 'OK' && dataTom.status === 'OK') {
                         let resTodayFinal = dataToday.results;
                         let resTomFinal = dataTom.results;
 
                         if (speedKts > 2) {
-                            const currentIftar = new Date(resTodayFinal.sunset);
-                            const timeToIftarHours = (currentIftar - new Date()) / 3600000;
-                            if (timeToIftarHours > 0 && timeToIftarHours < 12) {
-                                const dist = speedKts * timeToIftarHours;
+                            const currentSunset = new Date(resTodayFinal.sunset);
+                            const timeToSunset = (currentSunset - new Date()) / 3600000;
+                            if (timeToSunset > 0 && timeToSunset < 12) {
+                                const dist = speedKts * timeToSunset;
                                 const dLat = (dist * Math.cos(course * Math.PI / 180)) / 60;
                                 const dLng = (dist * Math.sin(course * Math.PI / 180)) / (60 * Math.cos(latitude * Math.PI / 180));
                                 const resFut = await fetch(`https://api.sunrise-sunset.org/json?lat=${latitude + dLat}&lng=${longitude + dLng}&formatted=0`);
@@ -323,9 +363,9 @@
                             }
 
                             const baseTomFajr = new Date(resTomFinal.astronomical_twilight_begin);
-                            const timeToTomFajrHours = (baseTomFajr - new Date()) / 3600000;
-                            if (timeToTomFajrHours > 0 && timeToTomFajrHours < 24) {
-                                const dist = speedKts * timeToTomFajrHours;
+                            const timeToTomFajr = (baseTomFajr - new Date()) / 3600000;
+                            if (timeToTomFajr > 0 && timeToTomFajr < 24) {
+                                const dist = speedKts * timeToTomFajr;
                                 const dLat = (dist * Math.cos(course * Math.PI / 180)) / 60;
                                 const dLng = (dist * Math.sin(course * Math.PI / 180)) / (60 * Math.cos(latitude * Math.PI / 180));
                                 const resFutTom = await fetch(`https://api.sunrise-sunset.org/json?lat=${latitude + dLat}&lng=${longitude + dLng}&date=${tomorrowStr}&formatted=0`);
@@ -337,33 +377,33 @@
                         let dawn = new Date(resTodayFinal.astronomical_twilight_begin);
                         let rise = new Date(resTodayFinal.sunrise);
                         let dhuhr = new Date(resTodayFinal.solar_noon);
+                        let asr = new Date(dhuhr.getTime() + (new Date(resTodayFinal.sunset).getTime() - dhuhr.getTime()) * 0.55);
                         let sunset = new Date(resTodayFinal.sunset);
                         let isha = new Date(resTodayFinal.astronomical_twilight_end);
-                        
                         let nextDawn = new Date(resTomFinal.astronomical_twilight_begin);
                         let nextRise = new Date(resTomFinal.sunrise);
 
                         const isInvalid = (d) => isNaN(d.getTime()) || d.getFullYear() === 1970;
-                        let isFajrFallback = false;
-                        let isIshaFallback = false;
-                        let isNextFajrFallback = false;
+                        let isFajrFallback = false; let isIshaFallback = false; let isNextFajrFallback = false;
 
                         if (isInvalid(rise) || isInvalid(sunset)) {
-                            rise = new Date(dhuhr.getTime() - 6 * 3600000);
-                            sunset = new Date(dhuhr.getTime() + 6 * 3600000);
+                            rise = new Date(dhuhr.getTime() - 6 * 3600000); sunset = new Date(dhuhr.getTime() + 6 * 3600000);
                             isFajrFallback = true; isIshaFallback = true; isNextFajrFallback = true;
                         }
-
                         if (isInvalid(dawn) || dawn > rise) { dawn = new Date(rise.getTime() - 90 * 60000); isFajrFallback = true; }
                         if (isInvalid(isha) || isha < sunset) { isha = new Date(sunset.getTime() + 90 * 60000); isIshaFallback = true; }
                         if (isInvalid(nextDawn) || nextDawn > nextRise) { nextDawn = new Date(nextRise.getTime() - 90 * 60000); isNextFajrFallback = true; }
 
                         setFallbackApplied({ fajr: isFajrFallback, isha: isIshaFallback, nextFajr: isNextFajrFallback });
 
-                        const asr = new Date(dhuhr.getTime() + (sunset.getTime() - dhuhr.getTime()) * 0.55);
-
-                        setSolarDates({ fajr: dawn, iftar: sunset });
-                        setNextFajrDate(nextDawn);
+                        setSolarDates({ 
+                            fajr: dawn, 
+                            dhuhr: dhuhr,
+                            asr: asr,
+                            maghrib: sunset, 
+                            isha: isha,
+                            nextFajr: nextDawn
+                        });
 
                         const opts = { hour: '2-digit', minute: '2-digit' };
                         setSolarTimes({
@@ -381,92 +421,51 @@
 
             const handleManualCalculate = () => {
                 if (latDeg && latMin && lngDeg && lngMin) {
-                    let lat = parseInt(latDeg) + (parseFloat(latMin) / 60); if (latDir === 'S') lat = -lat;
-                    let lng = parseInt(lngDeg) + (parseFloat(lngMin) / 60); if (lngDir === 'W') lng = -lng;
-                    lastFetchRef.current = 0; 
-                    fetchSolarTimes(lat, lng, 0, 0);
+                    let lat = parseInt(latDeg) + (parseFloat(latMin || 0) / 60); lat = latDir === 'S' ? -lat : lat;
+                    let lng = parseInt(lngDeg) + (parseFloat(lngMin || 0) / 60); lng = lngDir === 'W' ? -lng : lng;
+                    lastFetchRef.current = 0; fetchSolarTimes(lat, lng, 0, 0);
                 }
             };
-
-            useEffect(() => { if (latDeg && lngDeg && !isGpsActive) handleManualCalculate(); }, []);
 
             const toggleGps = () => {
                 if (isGpsActive) {
                     if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current);
-                    setIsGpsActive(false);
-                    setVelocity({ speed: 0, course: 0 });
-                    setGpsHistory([]);
-                } else {
-                    if (navigator.geolocation) {
-                        setIsGpsActive(true);
-                        setIsLoadingLocation(true);
-                        watchIdRef.current = navigator.geolocation.watchPosition((p) => {
-                            const la = p.coords.latitude; 
-                            const lo = p.coords.longitude;
-                            const sog = p.coords.speed ? p.coords.speed * 1.94384 : 0;
-                            const cog = p.coords.heading || 0;
-
-                            setLatDeg(Math.floor(Math.abs(la))); 
-                            setLatMin(((Math.abs(la) % 1) * 60).toFixed(2)); 
-                            setLatDir(la >= 0 ? 'N' : 'S');
-                            setLngDeg(Math.floor(Math.abs(lo))); 
-                            setLngMin(((Math.abs(lo) % 1) * 60).toFixed(2)); 
-                            setLngDir(lo >= 0 ? 'E' : 'W');
-
-                            const now = Date.now();
-                            setGpsHistory(prev => {
-                                const newHistory = [...prev, { lat: la, lng: lo, speed: sog, course: cog, t: now }]
-                                    .filter(item => now - item.t < 20000);
-                                
-                                let avgSog = sog; let avgCog = cog;
-                                if (newHistory.length > 0) {
-                                    avgSog = newHistory.reduce((a, b) => a + b.speed, 0) / newHistory.length;
-                                    avgCog = newHistory.reduce((a, b) => a + b.course, 0) / newHistory.length;
-                                    setVelocity({ speed: avgSog, course: avgCog });
-                                }
-                                fetchSolarTimes(la, lo, avgSog, avgCog);
-                                return newHistory;
-                            });
-                        }, (err) => {
-                            console.error(err);
-                            setIsGpsActive(false);
-                            setIsLoadingLocation(false);
-                        }, { enableHighAccuracy: true, maximumAge: 0 });
-                    }
+                    setIsGpsActive(false); setVelocity({ speed: 0, course: 0 });
+                } else if (navigator.geolocation) {
+                    setIsGpsActive(true); setIsLoadingLocation(true);
+                    watchIdRef.current = navigator.geolocation.watchPosition((p) => {
+                        const la = p.coords.latitude; const lo = p.coords.longitude;
+                        const sog = p.coords.speed ? p.coords.speed * 1.94384 : 0;
+                        const cog = p.coords.heading || 0;
+                        setLatDeg(Math.floor(Math.abs(la))); setLatMin(((Math.abs(la) % 1) * 60).toFixed(2)); setLatDir(la >= 0 ? 'N' : 'S');
+                        setLngDeg(Math.floor(Math.abs(lo))); setLngMin(((Math.abs(lo) % 1) * 60).toFixed(2)); setLngDir(lo >= 0 ? 'E' : 'W');
+                        setVelocity({ speed: sog, course: cog });
+                        fetchSolarTimes(la, lo, sog, cog);
+                    }, (err) => { setIsGpsActive(false); setIsLoadingLocation(false); }, { enableHighAccuracy: true, maximumAge: 0 });
                 }
             };
 
-            const getCurrentDecimalLat = () => {
-                if(!latDeg) return null;
-                let lat = parseInt(latDeg) + (parseFloat(latMin || 0) / 60); 
-                return latDir === 'S' ? -lat : lat;
-            };
-            const getCurrentDecimalLng = () => {
-                if(!lngDeg) return null;
-                let lng = parseInt(lngDeg) + (parseFloat(lngMin || 0) / 60); 
-                return lngDir === 'W' ? -lng : lng;
-            };
-
+            const getCurrentDecimalLat = () => { if(!latDeg) return null; let lat = parseInt(latDeg) + (parseFloat(latMin || 0) / 60); return latDir === 'S' ? -lat : lat; };
+            const getCurrentDecimalLng = () => { if(!lngDeg) return null; let lng = parseInt(lngDeg) + (parseFloat(lngMin || 0) / 60); return lngDir === 'W' ? -lng : lng; };
             const isFajrPassed = solarDates ? new Date() > solarDates.fajr : false;
 
             return (
-                <div className="min-h-screen bg-stone-100 text-stone-800 font-sans pb-10">
-                    
-                    {/* Update Popup */}
+                <div className={`min-h-screen bg-stone-100 text-stone-800 font-sans pb-10 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
                     {showUpdatePopup && (
-                        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-stone-900/70 backdrop-blur-sm animate-in fade-in">
+                        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-stone-900/70 backdrop-blur-sm animate-in fade-in" dir={isRTL ? 'rtl' : 'ltr'}>
                             <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden border-2 border-emerald-500">
                                 <div className="bg-emerald-100 p-5 text-center">
                                     <Sparkles size={32} className="mx-auto text-emerald-600 mb-2" />
                                     <h3 className="font-bold text-lg text-emerald-900">{t.updTitle}</h3>
                                 </div>
                                 <div className="p-5 space-y-4 text-sm text-stone-700">
-                                    <ul className="space-y-3 list-disc pl-4 marker:text-emerald-500">
+                                    <ul className={`space-y-3 list-disc ${isRTL ? 'pr-4' : 'pl-4'} marker:text-emerald-500`}>
                                         <li>{t.updPoint1}</li>
                                         <li>{t.updPoint2}</li>
                                         <li>{t.updPoint3}</li>
+                                        <li className="font-medium text-emerald-800">{t.updPoint4}</li>
                                     </ul>
-                                    <button onClick={closeUpdatePopup} className="w-full mt-6 bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800 transition shadow-md">
+                                    <button onClick={() => { localStorage.setItem('hasSeenUpdateV3', 'true'); setShowUpdatePopup(false); }} className="w-full mt-6 bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800 transition">
                                         {t.updBtn}
                                     </button>
                                 </div>
@@ -479,36 +478,34 @@
                     )}
 
                     {showInfo && (
-                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-in fade-in">
-                            <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-                                <div className="bg-emerald-900 p-4 flex justify-between items-center text-white">
-                                    <h3 className="font-bold flex items-center gap-2"><InfoCircle size={18} /> {t.infoTitle}</h3>
-                                    <button onClick={() => setShowInfo(false)} className="bg-white/10 p-1.5 rounded-full hover:bg-white/20 transition"><XIcon size={16} /></button>
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-in fade-in" dir={isRTL ? 'rtl' : 'ltr'}>
+                            <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden text-sm">
+                                <div className="bg-emerald-900 p-4 flex justify-between items-center text-white font-bold">
+                                    <h3><InfoCircle size={18} className={`inline ${isRTL ? 'ml-2' : 'mr-2'}`} /> {t.infoTitle}</h3>
+                                    <button onClick={() => setShowInfo(false)}><XIcon size={16} /></button>
                                 </div>
-                                <div className="p-5 space-y-4 text-sm text-stone-700">
-                                    <div><h4 className="font-bold text-emerald-800">{t.infoBaseTitle}</h4><p className="mt-1 leading-relaxed">{t.infoBase}</p></div>
-                                    <div className="border-t border-stone-100 pt-3"><h4 className="font-bold text-emerald-800">{t.infoDRTitle}</h4><p className="mt-1 leading-relaxed">{t.infoDR}</p></div>
-                                    <div className="border-t border-stone-100 pt-3"><h4 className="font-bold text-emerald-800">{t.infoHighLatTitle}</h4><p className="mt-1 leading-relaxed">{t.infoHighLat}</p></div>
-                                    <button onClick={() => setShowInfo(false)} className="w-full mt-4 bg-stone-100 text-stone-800 py-2.5 rounded-lg font-bold hover:bg-stone-200 transition">{t.btnClose}</button>
+                                <div className="p-5 space-y-4 text-stone-700">
+                                    <div><h4 className="font-bold text-emerald-800">{t.infoBaseTitle}</h4><p>{t.infoBase}</p></div>
+                                    <div className="border-t pt-3"><h4 className="font-bold text-emerald-800">{t.infoDRTitle}</h4><p>{t.infoDR}</p></div>
+                                    <div className="border-t pt-3"><h4 className="font-bold text-emerald-800">{t.infoHighLatTitle}</h4><p>{t.infoHighLat}</p></div>
+                                    <button onClick={() => setShowInfo(false)} className="w-full mt-4 bg-stone-100 py-2.5 rounded-lg font-bold">{t.btnClose}</button>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     <header className="bg-emerald-900 text-white p-6 shadow-md rounded-b-3xl relative">
-                        <div className="absolute top-6 right-6 flex gap-2">
-                            <button onClick={() => setShowCompass(true)} className="bg-emerald-500/20 text-emerald-300 p-2 rounded-full border border-emerald-400/30 transition-all active:scale-95"><CompassIcon size={18} /></button>
-                            <button onClick={() => setShowInfo(true)} className="bg-white/10 p-2 rounded-full border border-white/20 transition-all active:scale-95"><InfoCircle size={18} /></button>
-                            <button onClick={() => {
-                                const langs = ['en', 'nl', 'id'];
-                                setLang(langs[(langs.indexOf(lang) + 1) % langs.length]);
-                            }} className="bg-white/10 p-2 rounded-full border border-white/20 transition-all active:scale-95 flex items-center justify-center font-bold text-xs w-9 h-9 uppercase">
-                                {lang}
+                        <div className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} flex gap-2`} dir="ltr">
+                            <button onClick={() => setShowCompass(true)} className="bg-emerald-500/20 text-emerald-300 p-2 rounded-full border border-emerald-400/30 active:scale-95"><CompassIcon size={18} /></button>
+                            <button onClick={() => setShowInfo(true)} className="bg-white/10 p-2 rounded-full border border-white/20 active:scale-95"><InfoCircle size={18} /></button>
+                            <button onClick={toggleLanguage} className="bg-white/10 p-2 rounded-full border border-white/20 active:scale-95 flex items-center justify-center font-bold text-xs w-9 h-9 uppercase">
+                                {lang === 'ar' ? 'ع' : lang}
                             </button>
                         </div>
-                        
-                        <div className="max-w-md mx-auto pr-32">
-                            <h1 className="text-2xl font-bold flex items-center gap-2 tracking-tight"><Anchor size={24} className="text-emerald-400" /> {t.title}</h1>
+                        <div className={`max-w-md mx-auto ${isRTL ? 'pl-32' : 'pr-32'}`}>
+                            <h1 className="text-2xl font-bold flex items-center gap-2 tracking-tight">
+                                <Anchor size={24} className="text-emerald-400" /> {t.title}
+                            </h1>
                             <p className="text-stone-300 text-xs mt-1 font-light">{t.subtitle}</p>
                         </div>
                     </header>
@@ -516,8 +513,7 @@
                     <main className="max-w-md mx-auto px-4 mt-6 space-y-6">
                         <section className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
                             <h2 className="text-lg font-medium flex items-center gap-2 mb-4"><Navigation size={20} className="text-emerald-700" /> {t.navTitle}</h2>
-                            
-                            <div className="space-y-3 mb-2">
+                            <div className="space-y-3 mb-2" dir="ltr">
                                 <div className="flex items-center gap-2 bg-stone-50 p-2 rounded-lg border border-stone-100">
                                     <span className="text-[10px] font-bold w-8 text-stone-400">LAT</span>
                                     <input type="number" value={latDeg} onChange={e=>setLatDeg(e.target.value)} disabled={isGpsActive} className="w-12 p-1 text-center bg-transparent border-b border-stone-200 outline-none disabled:opacity-50" />°
@@ -531,13 +527,11 @@
                                     <select value={lngDir} onChange={e=>setLngDir(e.target.value)} disabled={isGpsActive} className="bg-transparent font-bold text-emerald-800"><option>E</option><option>W</option></select>
                                 </div>
                             </div>
-
-                            <div className={`flex justify-between px-2 text-[10px] font-mono mb-4 transition-opacity ${isGpsActive ? 'text-emerald-700' : 'text-stone-300 opacity-0'}`}>
+                            <div className={`flex justify-between px-2 text-[10px] font-mono mb-4 transition-opacity ${isGpsActive ? 'text-emerald-700' : 'text-stone-300 opacity-0'}`} dir="ltr">
                                 <span>SOG: {velocity.speed.toFixed(1)} kts</span>
                                 <span className="flex items-center gap-1"><span className="animate-pulse text-emerald-500">●</span> Live GPS</span>
                                 <span>COG: {Math.round(velocity.course)}°</span>
                             </div>
-
                             <div className="flex gap-2">
                                 <button onClick={toggleGps} className={`flex-1 py-3 rounded-xl font-bold border transition-colors ${isGpsActive ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-stone-100 text-stone-700 border-stone-200'}`}>
                                     {isGpsActive ? t.btnGPS : t.btnGPSOff}
@@ -547,22 +541,30 @@
                                 </button>
                             </div>
                         </section>
-                        
-                        <section className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 text-center shadow-inner relative overflow-hidden">
-                             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                                {nextEvent === 'Maghrib' ? <Sun size={120} /> : <Moon size={120} />}
+
+                        <section className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 text-center shadow-inner relative overflow-hidden flex flex-col items-center justify-center min-h-[160px]">
+                            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                                {nextEvent.includes(t.fajr) || nextEvent.includes(t.isha) ? <Moon size={120} /> : <Sun size={120} />}
                             </div>
-                            <h2 className="text-xs font-bold text-emerald-800 uppercase tracking-widest mb-2 relative z-10">{nextEvent === 'Fajr' ? t.timeTillFajr : t.timeTillMaghrib}</h2>
-                            <p className="text-5xl font-light tabular-nums tracking-tighter text-stone-900 relative z-10">{countdown}</p>
+                            <h2 className="text-xs font-bold text-emerald-800 uppercase tracking-widest mb-2 relative z-10">{nextEvent}</h2>
+                            <p className="text-5xl font-light tabular-nums tracking-tighter text-stone-900 relative z-10" dir="ltr">{countdown}</p>
                             {!solarDates && <p className="text-[10px] mt-2 text-stone-400">{t.waitingForLoc}</p>}
+                            
+                            {/* EVENT TRACKER (Nieuw) */}
+                            {upcomingFestival && (
+                                <div className="mt-4 inline-flex items-center gap-1.5 bg-white/60 px-3 py-1.5 rounded-full border border-emerald-200 shadow-sm relative z-10">
+                                    <CalendarIcon size={14} className="text-emerald-600" />
+                                    <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">{upcomingFestival}</span>
+                                </div>
+                            )}
                         </section>
 
                         {solarTimes && (
-                            <section className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-                                <div className="grid grid-cols-6 gap-0.5 text-center">
-                                    <div className={`py-2 rounded-l-lg border-r border-white transition-colors ${isFajrPassed ? 'bg-stone-100' : 'bg-emerald-50'}`}>
+                            <section className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm overflow-hidden text-center">
+                                <div className="grid grid-cols-6 gap-0.5" dir="ltr">
+                                    <div className={`py-2 rounded-l-lg border-r border-white ${isFajrPassed ? 'bg-stone-100' : 'bg-emerald-50'}`}>
                                         <p className={`text-[7px] font-bold uppercase ${isFajrPassed ? 'text-stone-400' : 'text-emerald-800'}`}>{t.fajr}</p>
-                                        <p className={`text-[11px] font-bold ${isFajrPassed ? 'text-stone-400 opacity-60' : 'text-stone-800'}`}>{solarTimes.fajr}{fallbackApplied.fajr && <span className="text-amber-500 ml-0.5">*</span>}</p>
+                                        <p className={`text-[11px] font-bold ${isFajrPassed ? 'text-stone-400 opacity-60' : 'text-stone-800'}`}>{solarTimes.fajr}{fallbackApplied.fajr && <span className="text-amber-500">*</span>}</p>
                                     </div>
                                     <div className="bg-stone-50 py-2 border-r border-white">
                                         <p className="text-[7px] font-bold text-stone-400 uppercase">{t.dhuhr}</p>
@@ -578,16 +580,16 @@
                                     </div>
                                     <div className="bg-stone-50 py-2 border-r border-white">
                                         <p className="text-[7px] font-bold text-stone-400 uppercase">{t.isha}</p>
-                                        <p className="text-[11px] font-medium text-stone-700">{solarTimes.isha}{fallbackApplied.isha && <span className="text-amber-500 ml-0.5">*</span>}</p>
+                                        <p className="text-[11px] font-medium text-stone-700">{solarTimes.isha}{fallbackApplied.isha && <span className="text-amber-500">*</span>}</p>
                                     </div>
                                     <div className="bg-emerald-100/50 py-2 rounded-r-lg">
                                         <p className="text-[7px] font-bold text-emerald-800 uppercase">{t.nextFajr}</p>
-                                        <p className="text-[11px] font-bold text-stone-800">{solarTimes.nextFajr}{fallbackApplied.nextFajr && <span className="text-amber-500 ml-0.5">*</span>}</p>
+                                        <p className="text-[11px] font-bold text-stone-800">{solarTimes.nextFajr}{fallbackApplied.nextFajr && <span className="text-amber-500">*</span>}</p>
                                     </div>
                                 </div>
-                                <div className="mt-3 text-center space-y-1">
-                                    {isGpsActive && <p className="text-[8px] text-emerald-600 italic">{t.legendLive}</p>}
-                                    {(fallbackApplied.fajr || fallbackApplied.isha || fallbackApplied.nextFajr) && <p className="text-[8px] text-amber-600 font-medium italic">{t.legendFallback}</p>}
+                                <div className="mt-3 text-[8px] text-center space-y-1">
+                                    {isGpsActive && <p className="text-emerald-600 italic">{t.legendLive}</p>}
+                                    {(fallbackApplied.fajr || fallbackApplied.isha || fallbackApplied.nextFajr) && <p className="text-amber-600 font-medium italic">{t.legendFallback}</p>}
                                 </div>
                             </section>
                         )}
@@ -595,21 +597,17 @@
                         <section className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
                              <div className="flex justify-between items-center mb-4">
                                 <h2 className="font-medium flex items-center gap-2"><BookOpen size={18} className="text-emerald-700"/>{t.refTitle}</h2>
-                                <button onClick={()=>setJournalText(prev => prev + (prev ? '\n\n' : '') + humanistPrompts[lang][Math.floor(Math.random()*5)])} className="text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full text-[10px] flex items-center gap-1 border border-emerald-100 transition-all hover:bg-emerald-100"><Sparkles size={12}/> {t.btnPrompt}</button>
+                                <button onClick={()=>setJournalText(prev => prev + (prev ? '\n\n' : '') + humanistPrompts[lang][Math.floor(Math.random()*5)])} className="text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full text-[10px] flex items-center gap-1 border border-emerald-100 hover:bg-emerald-100"><Sparkles size={12}/> {t.btnPrompt}</button>
                             </div>
                              <textarea value={journalText} onChange={e=>setJournalText(e.target.value)} className="w-full h-24 p-3 border border-stone-200 rounded-xl text-sm mb-2 outline-none shadow-inner" placeholder={t.refPlaceholder}></textarea>
-                             <button onClick={() => {
-                                 if (!journalText.trim()) return;
-                                 setEntries([{ id: Date.now(), text: journalText, date: new Date().toLocaleDateString(lang, { day: 'numeric', month: 'short' }), time: new Date().toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' }) }, ...entries]);
-                                 setJournalText('');
-                             }} className="w-full bg-emerald-800 text-white py-2 rounded-lg text-sm font-medium hover:bg-emerald-900">Opslaan</button>
+                             <button onClick={() => { if (!journalText.trim()) return; setEntries([{ id: Date.now(), text: journalText, date: new Date().toLocaleDateString(lang, { day: 'numeric', month: 'short' }), time: new Date().toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' }) }, ...entries]); setJournalText(''); }} className="w-full bg-emerald-800 text-white py-2 rounded-lg text-sm font-medium hover:bg-emerald-900">Opslaan</button>
                         </section>
 
                         <div className="space-y-3">
                             {entries.map(e=>(<div key={e.id} className="bg-white p-4 rounded-xl border border-stone-200 relative shadow-sm group">
-                                <span className="text-[9px] text-emerald-700 font-bold uppercase tracking-wider">{e.date} • {e.time}</span>
+                                <span className="text-[9px] text-emerald-700 font-bold uppercase tracking-wider" dir="ltr">{e.date} • {e.time}</span>
                                 <p className="text-sm mt-1 leading-relaxed text-stone-700">{e.text}</p>
-                                <button onClick={()=>setEntries(entries.filter(i=>i.id!==e.id))} className="absolute top-4 right-4 text-stone-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
+                                <button onClick={()=>setEntries(entries.filter(i=>i.id!==e.id))} className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} text-stone-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity`}><Trash2 size={14}/></button>
                             </div>))}
                         </div>
                         <footer className="text-center py-4"><p className="text-[10px] text-stone-400 font-medium uppercase tracking-widest">{t.copyright}</p></footer>
@@ -620,9 +618,7 @@
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
         }
     </script>
 </body>
